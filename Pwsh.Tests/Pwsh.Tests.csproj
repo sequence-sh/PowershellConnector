@@ -5,10 +5,12 @@
     <IsPackable>false</IsPackable>
     <IsPublishable>false</IsPublishable>
     <IsTestProject>true</IsTestProject>
+    <RootNamespace>Reductech.EDR.Connectors.Pwsh.Tests</RootNamespace>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup>
-    <RepositoryUrl>https://gitlab.com/reductech/templates/dotnetlibrary</RepositoryUrl>
+    <RepositoryUrl>https://gitlab.com/reductech/edr/connectors/pwsh</RepositoryUrl>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <Authors>reductech</Authors>
     <Company>Reductech</Company>
@@ -16,7 +18,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.0" />
+    <PackageReference Include="Reductech.EDR.Core.TestHarness" Version="0.3.0-a.master.2011261617" />
+    <PackageReference Include="Reductech.Utilities.Testing" Version="0.2.0-a.master.1604435560" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -33,7 +37,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DotNetLibrary\DotNetLibrary.csproj" />
+    <ProjectReference Include="..\Pwsh\Pwsh.csproj" />
   </ItemGroup>
 
 </Project>
