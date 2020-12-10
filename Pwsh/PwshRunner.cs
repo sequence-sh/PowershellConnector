@@ -13,6 +13,8 @@ namespace Reductech.EDR.Connectors.Pwsh
 {
     public class PwshRunner
     {
+        public const string SingleValuePropertyName = "data";
+        
         internal static void ProcessData<T>(object? sender, int index, Action<T> action)
         {
             if (sender is PSDataCollection<T> dc)
@@ -70,8 +72,8 @@ namespace Reductech.EDR.Connectors.Pwsh
 
         public static Entity EntityFromPSObject(PSObject pso)
         {
-            Entity? entity = null;
-            if (pso.BaseObject is PSObject)
+            Entity? entity;
+            if (pso.BaseObject is PSObject || pso.BaseObject is PSCustomObject)
             {
                 var list = pso.Properties.Select(p => new KeyValuePair<string, EntityValue>(
                     p.Name, EntityValue.Create((string)p.Value))).ToImmutableList();
@@ -80,7 +82,7 @@ namespace Reductech.EDR.Connectors.Pwsh
             else
             {
                 entity = new Entity(new KeyValuePair<string, EntityValue>(
-                    "value", EntityValue.Create(pso.BaseObject.ToString())));
+                    SingleValuePropertyName, EntityValue.Create(pso.BaseObject.ToString())));
             }
             return entity;
         }
