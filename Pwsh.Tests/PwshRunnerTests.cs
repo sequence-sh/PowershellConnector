@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
@@ -53,11 +54,10 @@ namespace Reductech.EDR.Connectors.Pwsh.Tests
         {
             var logger = new TestLogger();
             var script = @"Write-Output 'one'; Write-Output 'two'";
-            var result = new List<string>(2);
-                
-            await foreach (var obj in PwshRunner.RunScript(script, logger))
-                result.Add(obj.ToString());
             
+            var result = await PwshRunner.RunScript(script, logger)
+                .Select(obj => obj.ToString()).ToListAsync();
+
             Assert.Equal(new List<string>{"one", "two"}, result);
         }
         
@@ -67,10 +67,9 @@ namespace Reductech.EDR.Connectors.Pwsh.Tests
         {
             var logger = new TestLogger();
             var script = @"Write-Output 'one'; Write-Error 'error'; Write-Output 'two'; Write-Warning 'warning'";
-            var result = new List<string>(2);
             
-            await foreach (var obj in PwshRunner.RunScript(script, logger))
-                result.Add(obj.ToString());
+            var result = await PwshRunner.RunScript(script, logger)
+                .Select(obj => obj.ToString()).ToListAsync();
 
             Assert.Equal(2, logger.LoggedValues.Count);
             Assert.Contains(logger.LoggedValues, o => o.Equals("error"));
@@ -111,5 +110,46 @@ namespace Reductech.EDR.Connectors.Pwsh.Tests
             Assert.Single(entity);
             Assert.Equal(expected, val1!.ToString());
         }
+        
+        [Fact]
+        public void EntityFromPSObject_WhenBaseObjectIsHashtable_ReturnsEntity()
+        {
+            var pso = new PSObject(new Hashtable
+            {
+                {"prop1", "value1"},
+                {"prop2", 2}
+            });
+
+            var entity = PwshRunner.EntityFromPSObject(pso);
+
+            Assert.NotNull(entity);
+            
+            entity.TryGetValue("prop1", out var val1);
+            entity.TryGetValue("prop2", out var val2);
+            
+            Assert.Equal(2, entity.Count());
+            Assert.Equal("value1", val1!.ToString());
+            Assert.Equal(2, val2!.Value.AsT1.Value.AsT1);
+        }
+        
+        [Fact]
+        [Trait("Category", "Integration")]
+        public async void EntityFromPSObject_WhenBaseObjectIsHashtable_ReturnsEntity_Integration()
+        {
+            var logger = new TestLogger();
+            var script = @"@{prop1 = 'value1'; prop2 = 2} | Write-Output";
+            
+            var result = await PwshRunner.GetEntityEnumerable(script, logger).ToListAsync();
+
+            Assert.Single(result);
+            
+            result[0].TryGetValue("prop1", out var val1);
+            result[0].TryGetValue("prop2", out var val2);
+            
+            Assert.Equal("value1", val1!.ToString());
+            Assert.Equal(2, val2!.Value.AsT1.Value.AsT1);
+        }
+        
+        
     }
 }

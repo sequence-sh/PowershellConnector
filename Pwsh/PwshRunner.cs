@@ -2,19 +2,22 @@
 using Reductech.EDR.Core;
 using Reductech.EDR.Core.Entities;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Globalization;
 using System.Linq;
 using System.Management.Automation;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using Reductech.EDR.Core.Internal;
 
 namespace Reductech.EDR.Connectors.Pwsh
 {
     public class PwshRunner
     {
         public const string SingleValuePropertyName = "data";
-        
+
         internal static void ProcessData<T>(object? sender, int index, Action<T> action)
         {
             if (sender is PSDataCollection<T> dc)
@@ -70,6 +73,43 @@ namespace Reductech.EDR.Connectors.Pwsh
                 yield return EntityFromPSObject(pso);
         }
 
+        private static EntityValue GetEntityValue(object o) =>
+            GetEntityValue(o, CultureInfo.InvariantCulture);
+        
+        private static EntityValue GetEntityValue(object o, IFormatProvider cultureInfo)
+        {
+            EntitySingleValue value;
+            switch (o)
+            {
+                case string s:
+                    value = new EntitySingleValue(s, s);
+                    break;
+                case int i:
+                    value = new EntitySingleValue(i, i.ToString());
+                    break;
+                case double d:
+                    value = new EntitySingleValue(d, d.ToString(cultureInfo));
+                    break;
+                case bool b:
+                    value = new EntitySingleValue(b, b.ToString());
+                    break;
+                case Enumeration e:
+                    value = new EntitySingleValue(e, e.Value);
+                    break;
+                case DateTime dt:
+                    value = new EntitySingleValue(dt, dt.ToString(cultureInfo));
+                    break;
+                case Entity ent:
+                    value = new EntitySingleValue(ent, string.Empty);
+                    break;
+                default:
+                    var str = o.ToString() ?? string.Empty;
+                    value = new EntitySingleValue(str, str);
+                    break;
+            }
+            return new EntityValue(value);
+        }
+        
         public static Entity EntityFromPSObject(PSObject pso)
         {
             Entity? entity;
@@ -78,6 +118,18 @@ namespace Reductech.EDR.Connectors.Pwsh
                 var list = pso.Properties.Select(p => new KeyValuePair<string, EntityValue>(
                     p.Name, EntityValue.Create((string)p.Value))).ToImmutableList();
                 entity = new Entity(list);
+            }
+            else if (pso.BaseObject is Hashtable ht)
+            {
+                var list = new List<KeyValuePair<string, EntityValue>>();
+                foreach (var key in ht.Keys)
+                {
+                    if (key == null)
+                        throw new ArgumentException("Could not convert null key in Hashtable");
+                    var val = GetEntityValue(ht[key]!);
+                    list.Add(new KeyValuePair<string, EntityValue>(key.ToString()!, val));
+                }
+                entity = new Entity(list.ToImmutableList());
             }
             else
             {
