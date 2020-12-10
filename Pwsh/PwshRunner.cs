@@ -13,7 +13,7 @@ namespace Reductech.EDR.Connectors.Pwsh
 {
     public class PwshRunner
     {
-        private static void ProcessData<T>(object? sender, int index, Action<T> action)
+        internal static void ProcessData<T>(object? sender, int index, Action<T> action)
         {
             if (sender is PSDataCollection<T> dc)
             {
@@ -48,7 +48,8 @@ namespace Reductech.EDR.Connectors.Pwsh
 
             ps.AddScript(script);
 
-            var psTask = Task.Factory.FromAsync(ps.BeginInvoke<PSObject, PSObject>(null, output), end => {
+            var psTask = Task.Factory.FromAsync(ps.BeginInvoke<PSObject, PSObject>(null, output), end =>
+            {
                 ps.EndInvoke(end);
                 //if (ps.EndInvoke(end).Count > 0)
                 //    throw new InvalidPowerShellStateException("Pipeline not empty");
@@ -64,10 +65,10 @@ namespace Reductech.EDR.Connectors.Pwsh
         public static async IAsyncEnumerable<Entity> GetEntityEnumerable(string script, ILogger logger)
         {
             await foreach (var pso in RunScript(script, logger))
-                yield return EntityFromPsObject(pso);
+                yield return EntityFromPSObject(pso);
         }
 
-        public static Entity EntityFromPsObject(PSObject pso)
+        public static Entity EntityFromPSObject(PSObject pso)
         {
             Entity? entity = null;
             if (pso.BaseObject is PSObject)
