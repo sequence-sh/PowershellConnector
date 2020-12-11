@@ -53,12 +53,11 @@ namespace Reductech.EDR.Connectors.Pwsh.Tests
         public async void RunScript_ReadsDataFromOutputStream()
         {
             var logger = new TestLogger();
-            var script = @"Write-Output 'one'; Write-Output 'two'";
+            var script = @"Write-Output 'one'; Write-Output 2";
             
-            var result = await PwshRunner.RunScript(script, logger)
-                .Select(obj => obj.ToString()).ToListAsync();
+            var result = await PwshRunner.RunScript(script, logger).ToListAsync();
 
-            Assert.Equal(new List<string>{"one", "two"}, result);
+            Assert.Equal(new List<PSObject>{"one", 2}, result);
         }
         
         [Fact]
@@ -68,8 +67,7 @@ namespace Reductech.EDR.Connectors.Pwsh.Tests
             var logger = new TestLogger();
             var script = @"Write-Output 'one'; Write-Error 'error'; Write-Output 'two'; Write-Warning 'warning'";
             
-            var result = await PwshRunner.RunScript(script, logger)
-                .Select(obj => obj.ToString()).ToListAsync();
+            _ = await PwshRunner.RunScript(script, logger).ToListAsync();
 
             Assert.Equal(2, logger.LoggedValues.Count);
             Assert.Contains(logger.LoggedValues, o => o.Equals("error"));
@@ -149,7 +147,6 @@ namespace Reductech.EDR.Connectors.Pwsh.Tests
             Assert.Equal("value1", val1!.ToString());
             Assert.Equal(2, val2!.Value.AsT1.Value.AsT1);
         }
-        
         
     }
 }

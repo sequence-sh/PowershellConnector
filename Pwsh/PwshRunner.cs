@@ -113,28 +113,33 @@ namespace Reductech.EDR.Connectors.Pwsh
         public static Entity EntityFromPSObject(PSObject pso)
         {
             Entity? entity;
-            if (pso.BaseObject is PSObject || pso.BaseObject is PSCustomObject)
+            switch (pso.BaseObject)
             {
-                var list = pso.Properties.Select(p => new KeyValuePair<string, EntityValue>(
-                    p.Name, EntityValue.Create((string)p.Value))).ToImmutableList();
-                entity = new Entity(list);
-            }
-            else if (pso.BaseObject is Hashtable ht)
-            {
-                var list = new List<KeyValuePair<string, EntityValue>>();
-                foreach (var key in ht.Keys)
+                case PSObject _:
+                case PSCustomObject _:
                 {
-                    if (key == null)
-                        throw new ArgumentException("Could not convert null key in Hashtable");
-                    var val = GetEntityValue(ht[key]!);
-                    list.Add(new KeyValuePair<string, EntityValue>(key.ToString()!, val));
+                    var list = pso.Properties.Select(p => new KeyValuePair<string, EntityValue>(
+                        p.Name, GetEntityValue(p.Value))).ToImmutableList();
+                    entity = new Entity(list);
+                    break;
                 }
-                entity = new Entity(list.ToImmutableList());
-            }
-            else
-            {
-                entity = new Entity(new KeyValuePair<string, EntityValue>(
-                    SingleValuePropertyName, EntityValue.Create(pso.BaseObject.ToString())));
+                case Hashtable ht:
+                {
+                    var list = new List<KeyValuePair<string, EntityValue>>();
+                    foreach (var key in ht.Keys)
+                    {
+                        if (key == null)
+                            throw new ArgumentException("Could not convert null key in Hashtable");
+                        var val = GetEntityValue(ht[key]!);
+                        list.Add(new KeyValuePair<string, EntityValue>(key.ToString()!, val));
+                    }
+                    entity = new Entity(list.ToImmutableList());
+                    break;
+                }
+                default:
+                    entity = new Entity(new KeyValuePair<string, EntityValue>(
+                        SingleValuePropertyName, GetEntityValue(pso)));
+                    break;
             }
             return entity;
         }
