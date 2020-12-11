@@ -3,8 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
+using FluentAssertions;
 using Moq;
 using Reductech.EDR.Core;
+using Reductech.EDR.Core.Internal;
 using Reductech.EDR.Core.TestHarness;
 using Xunit;
 
@@ -93,20 +95,32 @@ namespace Reductech.EDR.Connectors.Pwsh.Tests
             Assert.Equal("value2", val2!.ToString());
         }
 
-        [Fact]
-        public void EntityFromPSObject_WhenBaseObjectIsNotPSO_ReturnsSingleValueEntity()
+        [Theory]
+        [InlineData("hello")]
+        [InlineData(123)]
+        [InlineData(1.5)]
+        [InlineData(true)]
+        public void EntityFromPSObject_WhenBaseObjectIsNotPSO_ReturnsSingleValueEntity(object expected)
         {
-            var expected = "hello";
             var pso = new PSObject(expected);
 
             var entity = PwshRunner.EntityFromPSObject(pso);
 
             Assert.NotNull(entity);
 
-            entity.TryGetValue(Entity.PrimitiveKey, out var val1);
+            entity.TryGetValue(Entity.PrimitiveKey, out var val);
 
-            Assert.Single(entity);
-            Assert.Equal(expected, val1!.ToString());
+            Assert.NotNull(val);
+
+            val!.Value.AsT1.Value.Switch(
+                s => expected.Should().BeOfType<string>().Which.Equals(s),
+                i => expected.Should().BeOfType<int>().Which.Equals(i),
+                d => expected.Should().BeOfType<double>().Which.Equals(d),
+                b => expected.Should().BeOfType<bool>().Which.Equals(b),
+                e => expected.Should().BeOfType<Enumeration>().Which.Equals(e),
+                dt => expected.Should().BeOfType<DateTime>().Which.Equals(dt),
+                ent => expected.Should().BeOfType<Entity>().Which.Equals(ent)
+            );
         }
 
         [Fact]
