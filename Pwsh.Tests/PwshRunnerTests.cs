@@ -20,7 +20,7 @@ namespace Reductech.EDR.Connectors.Pwsh.Tests
             var sender = new PSDataCollection<object>();
 
             Assert.Throws<ArgumentException>(() =>
-                PwshRunner.ProcessData<PSObject>(sender, 0, o => o.ToString()));
+                PwshRunner.ProcessData<PSObject>(sender, 0, _ => { }));
         }
 
         [Fact]
@@ -113,13 +113,13 @@ namespace Reductech.EDR.Connectors.Pwsh.Tests
             Assert.NotNull(val);
 
             val!.Value.AsT1.Value.Switch(
-                s => expected.Should().BeOfType<string>().Which.Equals(s),
-                i => expected.Should().BeOfType<int>().Which.Equals(i),
-                d => expected.Should().BeOfType<double>().Which.Equals(d),
-                b => expected.Should().BeOfType<bool>().Which.Equals(b),
-                e => expected.Should().BeOfType<Enumeration>().Which.Equals(e),
-                dt => expected.Should().BeOfType<DateTime>().Which.Equals(dt),
-                ent => expected.Should().BeOfType<Entity>().Which.Equals(ent)
+                s => _ = expected.Should().BeOfType<string>().Which.Equals(s),
+                i => _ = expected.Should().BeOfType<int>().Which.Equals(i),
+                d => _ = expected.Should().BeOfType<double>().Which.Equals(d),
+                b => _ = expected.Should().BeOfType<bool>().Which.Equals(b),
+                e => _ = expected.Should().BeOfType<Enumeration>().Which.Equals(e),
+                dt => _ = expected.Should().BeOfType<DateTime>().Which.Equals(dt),
+                ent => _ = expected.Should().BeOfType<Entity>().Which.Equals(ent)
             );
         }
 
