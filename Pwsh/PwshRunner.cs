@@ -42,7 +42,7 @@ namespace Reductech.EDR.Connectors.Pwsh
 
             output.DataAdded += (sender, ev) =>
                 ProcessData<PSObject>(sender, ev.Index, pso => buffer.Post(pso));
-
+            
             ps.Streams.Error.DataAdded += (sender, ev) =>
                 ProcessData<ErrorRecord>(sender, ev.Index, pso => logger.LogError(pso.Exception.Message));
 
@@ -139,7 +139,7 @@ namespace Reductech.EDR.Connectors.Pwsh
                     break;
                 default:
                     entity = new Entity(new KeyValuePair<string, EntityValue>(
-                        Entity.PrimitiveKey, new EntityValue(GetEntitySingleValue(pso))));
+                        Entity.PrimitiveKey, new EntityValue(GetEntitySingleValue(pso.BaseObject))));
                     break;
             }
             return entity;
