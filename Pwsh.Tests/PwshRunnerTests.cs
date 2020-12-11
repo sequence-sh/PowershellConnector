@@ -103,7 +103,7 @@ namespace Reductech.EDR.Connectors.Pwsh.Tests
 
             Assert.NotNull(entity);
             
-            entity.TryGetValue(PwshRunner.SingleValuePropertyName, out var val1);
+            entity.TryGetValue(Entity.PrimitiveKey, out var val1);
             
             Assert.Single(entity);
             Assert.Equal(expected, val1!.ToString());

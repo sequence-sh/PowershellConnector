@@ -16,8 +16,6 @@ namespace Reductech.EDR.Connectors.Pwsh
 {
     public class PwshRunner
     {
-        public const string SingleValuePropertyName = "data";
-
         internal static void ProcessData<T>(object? sender, int index, Action<T> action)
         {
             if (sender is PSDataCollection<T> dc)
@@ -138,7 +136,7 @@ namespace Reductech.EDR.Connectors.Pwsh
                 }
                 default:
                     entity = new Entity(new KeyValuePair<string, EntityValue>(
-                        SingleValuePropertyName, GetEntityValue(pso)));
+                        Entity.PrimitiveKey, GetEntityValue(pso)));
                     break;
             }
             return entity;
