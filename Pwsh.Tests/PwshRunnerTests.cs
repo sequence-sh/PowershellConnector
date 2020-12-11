@@ -20,7 +20,7 @@ namespace Reductech.EDR.Connectors.Pwsh.Tests
             Assert.Throws<ArgumentException>(() =>
                 PwshRunner.ProcessData<PSObject>(sender, 0, o => o.ToString()));
         }
-        
+
         [Fact]
         public void ProcessData_WhenSenderIsPSDataCollection_RemovesItemFromCollection()
         {
@@ -30,11 +30,11 @@ namespace Reductech.EDR.Connectors.Pwsh.Tests
             sender.Add("string1");
 
             PwshRunner.ProcessData<string>(sender, 0, o => { });
-            
+
             Assert.Single(sender);
             Assert.DoesNotContain(sender, o => expected.Equals(o));
         }
-        
+
         [Fact]
         public void ProcessData_WhenSenderIsPSDataCollection_InvokesAction()
         {
@@ -42,9 +42,9 @@ namespace Reductech.EDR.Connectors.Pwsh.Tests
             var str = "";
             sender.Add(str);
             var mock = new Mock<Action<object>>();
-            
+
             PwshRunner.ProcessData<object>(sender, 0, mock.Object);
-            
+
             mock.Verify(m => m.Invoke(str));
         }
 
@@ -54,19 +54,19 @@ namespace Reductech.EDR.Connectors.Pwsh.Tests
         {
             var logger = new TestLogger();
             var script = @"Write-Output 'one'; Write-Output 2";
-            
+
             var result = await PwshRunner.RunScript(script, logger).ToListAsync();
 
-            Assert.Equal(new List<PSObject>{"one", 2}, result);
+            Assert.Equal(new List<PSObject> { "one", 2 }, result);
         }
-        
+
         [Fact]
         [Trait("Category", "Integration")]
         public async void RunScript_LogsErrorsAndWarnings()
         {
             var logger = new TestLogger();
             var script = @"Write-Output 'one'; Write-Error 'error'; Write-Output 'two'; Write-Warning 'warning'";
-            
+
             _ = await PwshRunner.RunScript(script, logger).ToListAsync();
 
             Assert.Equal(2, logger.LoggedValues.Count);
@@ -84,15 +84,15 @@ namespace Reductech.EDR.Connectors.Pwsh.Tests
             var entity = PwshRunner.EntityFromPSObject(pso);
 
             Assert.NotNull(entity);
-            
+
             entity.TryGetValue("prop1", out var val1);
             entity.TryGetValue("prop2", out var val2);
-            
+
             Assert.Equal(2, entity.Count());
             Assert.Equal("value1", val1!.ToString());
             Assert.Equal("value2", val2!.ToString());
         }
-        
+
         [Fact]
         public void EntityFromPSObject_WhenBaseObjectIsNotPSO_ReturnsSingleValueEntity()
         {
@@ -102,13 +102,13 @@ namespace Reductech.EDR.Connectors.Pwsh.Tests
             var entity = PwshRunner.EntityFromPSObject(pso);
 
             Assert.NotNull(entity);
-            
+
             entity.TryGetValue(Entity.PrimitiveKey, out var val1);
-            
+
             Assert.Single(entity);
             Assert.Equal(expected, val1!.ToString());
         }
-        
+
         [Fact]
         public void EntityFromPSObject_WhenBaseObjectIsHashtable_ReturnsEntity()
         {
@@ -121,32 +121,73 @@ namespace Reductech.EDR.Connectors.Pwsh.Tests
             var entity = PwshRunner.EntityFromPSObject(pso);
 
             Assert.NotNull(entity);
-            
+
             entity.TryGetValue("prop1", out var val1);
             entity.TryGetValue("prop2", out var val2);
-            
+
             Assert.Equal(2, entity.Count());
             Assert.Equal("value1", val1!.ToString());
             Assert.Equal(2, val2!.Value.AsT1.Value.AsT1);
         }
-        
+
         [Fact]
         [Trait("Category", "Integration")]
         public async void EntityFromPSObject_WhenBaseObjectIsHashtable_ReturnsEntity_Integration()
         {
             var logger = new TestLogger();
             var script = @"@{prop1 = 'value1'; prop2 = 2} | Write-Output";
-            
+
             var result = await PwshRunner.GetEntityEnumerable(script, logger).ToListAsync();
 
             Assert.Single(result);
-            
+
             result[0].TryGetValue("prop1", out var val1);
             result[0].TryGetValue("prop2", out var val2);
-            
+
             Assert.Equal("value1", val1!.ToString());
             Assert.Equal(2, val2!.Value.AsT1.Value.AsT1);
         }
-        
+
+        [Fact]
+        public void EntityFromPSObject_WhenBaseObjectIsArray_ReturnsEntity()
+        {
+            var arr = new object[] { "value1", 2 };
+            var pso = new PSObject(arr);
+
+            var entity = PwshRunner.EntityFromPSObject(pso);
+
+            Assert.NotNull(entity);
+
+            entity.TryGetValue(Entity.PrimitiveKey, out var val);
+
+            Assert.NotNull(val);
+
+            var actual = val!.Value.AsT2.ToArray();
+
+            Assert.Equal(arr[0], actual[0].Value.AsT0);
+            Assert.Equal(arr[1], actual[1].Value.AsT1);
+        }
+
+        [Fact]
+        [Trait("Category", "Integration")]
+        public async void EntityFromPSObject_WhenBaseObjectIsArray_ReturnsEntity_Integration()
+        {
+            var logger = new TestLogger();
+            var script = @"Write-Output -NoEnumerate @('value1', 2)";
+
+            var result = await PwshRunner.GetEntityEnumerable(script, logger).ToListAsync();
+
+            Assert.Single(result);
+
+            result[0].TryGetValue(Entity.PrimitiveKey, out var val);
+
+            Assert.NotNull(val);
+
+            var arr = val!.Value.AsT2.ToArray();
+
+            Assert.Equal("value1", arr[0].Value);
+            Assert.Equal(2, arr[1].Value);
+        }
+
     }
 }

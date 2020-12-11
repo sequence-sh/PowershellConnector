@@ -71,10 +71,10 @@ namespace Reductech.EDR.Connectors.Pwsh
                 yield return EntityFromPSObject(pso);
         }
 
-        private static EntityValue GetEntityValue(object o) =>
-            GetEntityValue(o, CultureInfo.InvariantCulture);
+        private static EntitySingleValue GetEntitySingleValue(object o) =>
+            GetEntitySingleValue(o, CultureInfo.InvariantCulture);
         
-        private static EntityValue GetEntityValue(object o, IFormatProvider cultureInfo)
+        private static EntitySingleValue GetEntitySingleValue(object o, IFormatProvider cultureInfo)
         {
             EntitySingleValue value;
             switch (o)
@@ -105,7 +105,7 @@ namespace Reductech.EDR.Connectors.Pwsh
                     value = new EntitySingleValue(str, str);
                     break;
             }
-            return new EntityValue(value);
+            return value;
         }
         
         public static Entity EntityFromPSObject(PSObject pso)
@@ -117,7 +117,7 @@ namespace Reductech.EDR.Connectors.Pwsh
                 case PSCustomObject _:
                 {
                     var list = pso.Properties.Select(p => new KeyValuePair<string, EntityValue>(
-                        p.Name, GetEntityValue(p.Value))).ToImmutableList();
+                        p.Name, new EntityValue(GetEntitySingleValue(p.Value)))).ToImmutableList();
                     entity = new Entity(list);
                     break;
                 }
@@ -126,17 +126,20 @@ namespace Reductech.EDR.Connectors.Pwsh
                     var list = new List<KeyValuePair<string, EntityValue>>();
                     foreach (var key in ht.Keys)
                     {
-                        if (key == null)
-                            throw new ArgumentException("Could not convert null key in Hashtable");
-                        var val = GetEntityValue(ht[key]!);
-                        list.Add(new KeyValuePair<string, EntityValue>(key.ToString()!, val));
+                        var val = GetEntitySingleValue(ht[key]!);
+                        list.Add(new KeyValuePair<string, EntityValue>(key.ToString()!, new EntityValue(val)));
                     }
                     entity = new Entity(list.ToImmutableList());
                     break;
                 }
+                case object[] arr:
+                    var values = arr.Select(GetEntitySingleValue).ToImmutableList();
+                    entity = new Entity(new KeyValuePair<string, EntityValue>(Entity.PrimitiveKey,
+                        new EntityValue(values)));
+                    break;
                 default:
                     entity = new Entity(new KeyValuePair<string, EntityValue>(
-                        Entity.PrimitiveKey, GetEntityValue(pso)));
+                        Entity.PrimitiveKey, new EntityValue(GetEntitySingleValue(pso))));
                     break;
             }
             return entity;
