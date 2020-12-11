@@ -32,7 +32,7 @@ namespace Reductech.EDR.Connectors.Pwsh.Tests
                         }
                     },
                     Unit.Default,
-                    "value: hello!"
+                    $"({Entity.PrimitiveKey}: \"hello!\")"
                 );
             }
         }
