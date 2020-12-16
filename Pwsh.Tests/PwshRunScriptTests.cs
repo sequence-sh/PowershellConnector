@@ -3,6 +3,7 @@ using Reductech.EDR.Core.Entities;
 using Reductech.EDR.Core.Internal;
 using Reductech.EDR.Core.Steps;
 using Reductech.EDR.Core.TestHarness;
+using static Reductech.EDR.Core.TestHarness.StaticHelpers;
 using Reductech.EDR.Core.Util;
 using System.Collections.Generic;
 using Xunit.Abstractions;
@@ -83,6 +84,27 @@ namespace Reductech.EDR.Connectors.Pwsh.Tests
                     },
                     Unit.Default,
                     "(prop1: \"one\" prop2: 2)"
+                );
+                
+                yield return new StepCase("Run PowerShell passing a variable set to it",
+                    new EntityForEach()
+                    {
+                        EntityStream = new PwshRunScript
+                        {
+                            Script = Constant(@"$var1, $var2 | Write-Output"),
+                            Variables = Constant(CreateEntity(
+                                ("var1", "ABC"),
+                                ("var2", "DEF")
+                            ))
+                        },
+                        Action = new Print<Entity>
+                        {
+                            Value = new GetVariable<Entity> { Variable = VariableName.Entity }
+                        }
+                    },
+                    Unit.Default,
+                    "(value: \"ABC\")",
+                    "(value: \"DEF\")"
                 );
             }
         }

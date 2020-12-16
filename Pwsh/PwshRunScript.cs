@@ -6,6 +6,7 @@ using Reductech.EDR.Core.Entities;
 using Reductech.EDR.Core.Attributes;
 using Reductech.EDR.Core.Internal;
 using Reductech.EDR.Core.Internal.Errors;
+using Reductech.EDR.Core.Parser;
 
 namespace Reductech.EDR.Connectors.Pwsh
 {
@@ -20,12 +21,22 @@ namespace Reductech.EDR.Connectors.Pwsh
         /// <inheritdoc />
         public override async Task<Result<EntityStream, IError>> Run(IStateMonad stateMonad, CancellationToken cancellationToken)
         {
-            var script = await Script.Run(stateMonad, cancellationToken);
+            var script = await Script.Run(stateMonad, cancellationToken).Map(x => x.GetStringAsync());
 
             if (script.IsFailure)
                 return script.ConvertFailure<EntityStream>();
 
-            var stream = PwshRunner.GetEntityEnumerable(script.Value, stateMonad.Logger);
+            Entity? vars = null;
+            
+            if (Variables != null)
+            {
+                var variables = await Variables.Run(stateMonad, cancellationToken);
+                if (variables.IsFailure)
+                    return variables.ConvertFailure<EntityStream>();
+                vars = variables.Value;
+            }
+
+            var stream = PwshRunner.GetEntityEnumerable(script.Value, stateMonad.Logger, vars);
             var entityStream = new EntityStream(stream);
 
             return entityStream;
@@ -36,14 +47,14 @@ namespace Reductech.EDR.Connectors.Pwsh
         /// </summary>
         [StepProperty(order: 1)]
         [Required]
-        public IStep<string> Script { get; set; } = null!;
+        public IStep<StringStream> Script { get; set; } = null!;
 
         /// <summary>
         /// List of input variables and corresponding values.
         /// </summary>
         [StepProperty(order: 2)]
         [DefaultValueExplanation("No variables passed to the script")]
-        public IStep<Entity>? Variables { get; set; }
+        public IStep<Entity>? Variables { get; set; } = null;
 
         ///// <summary>
         ///// 
