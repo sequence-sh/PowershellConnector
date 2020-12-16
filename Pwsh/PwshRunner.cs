@@ -8,6 +8,7 @@ using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
 using System.Management.Automation;
+using System.Management.Automation.Runspaces;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using Reductech.EDR.Core.Internal;
@@ -30,12 +31,18 @@ namespace Reductech.EDR.Connectors.Pwsh
             }
         }
 
-        public static async IAsyncEnumerable<PSObject> RunScript(string script, ILogger logger)
+        public static async IAsyncEnumerable<PSObject> RunScript(string script,
+            ILogger logger, Entity? variables = null)
         {
+            var iss = InitialSessionState.CreateDefault();
 
-            //logger.LogDebug("Starting PowerShell");
+            if (variables != null)
+            {
+                var vars = variables.Select(v => new SessionStateVariableEntry(v.Key, v.Value, ""));
+                iss.Variables.Add(vars);
+            }
 
-            using var ps = PowerShell.Create();
+            using var ps = PowerShell.Create(iss);
 
             var output = new PSDataCollection<PSObject>();
             var buffer = new BufferBlock<PSObject>();
@@ -48,14 +55,12 @@ namespace Reductech.EDR.Connectors.Pwsh
 
             ps.Streams.Warning.DataAdded += (sender, ev) =>
                 ProcessData<WarningRecord>(sender, ev.Index, pso => logger.LogWarning(pso.Message));
-
+            
             ps.AddScript(script);
 
             var psTask = Task.Factory.FromAsync(ps.BeginInvoke<PSObject, PSObject>(null, output), end =>
             {
                 ps.EndInvoke(end);
-                //if (ps.EndInvoke(end).Count > 0)
-                //    throw new InvalidPowerShellStateException("Pipeline not empty");
                 buffer.Complete();
             });
 
@@ -65,9 +70,10 @@ namespace Reductech.EDR.Connectors.Pwsh
             await psTask;
         }
 
-        public static async IAsyncEnumerable<Entity> GetEntityEnumerable(string script, ILogger logger)
+        public static async IAsyncEnumerable<Entity> GetEntityEnumerable(string script,
+            ILogger logger, Entity? variables = null)
         {
-            await foreach (var pso in RunScript(script, logger))
+            await foreach (var pso in RunScript(script, logger, variables))
                 yield return EntityFromPSObject(pso);
         }
 
@@ -111,6 +117,7 @@ namespace Reductech.EDR.Connectors.Pwsh
         public static Entity EntityFromPSObject(PSObject pso)
         {
             Entity? entity;
+            //TODO: Add tests for null check
             switch (pso.BaseObject)
             {
                 case PSObject _:

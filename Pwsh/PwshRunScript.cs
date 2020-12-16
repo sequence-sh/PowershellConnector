@@ -25,7 +25,17 @@ namespace Reductech.EDR.Connectors.Pwsh
             if (script.IsFailure)
                 return script.ConvertFailure<EntityStream>();
 
-            var stream = PwshRunner.GetEntityEnumerable(script.Value, stateMonad.Logger);
+            Entity? vars = null;
+            
+            if (Variables != null)
+            {
+                var variables = await Variables.Run(stateMonad, cancellationToken);
+                if (variables.IsFailure)
+                    return variables.ConvertFailure<EntityStream>();
+                vars = variables.Value;
+            }
+
+            var stream = PwshRunner.GetEntityEnumerable(script.Value, stateMonad.Logger, vars);
             var entityStream = new EntityStream(stream);
 
             return entityStream;
@@ -43,7 +53,7 @@ namespace Reductech.EDR.Connectors.Pwsh
         /// </summary>
         [StepProperty(order: 2)]
         [DefaultValueExplanation("No variables passed to the script")]
-        public IStep<Entity>? Variables { get; set; }
+        public IStep<Entity>? Variables { get; set; } = null;
 
         ///// <summary>
         ///// 
