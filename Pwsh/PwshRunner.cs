@@ -34,7 +34,7 @@ namespace Reductech.EDR.Connectors.Pwsh
 
             if (variables != null)
             {
-                var vars = variables.Select(v => new SessionStateVariableEntry(v.Name, v.BestValue, ""));
+                var vars = variables.Select(v => new SessionStateVariableEntry(v.Name, v.BestValue, string.Empty));
                 iss.Variables.Add(vars);
             }
 
