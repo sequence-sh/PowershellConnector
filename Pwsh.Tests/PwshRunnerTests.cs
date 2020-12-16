@@ -3,12 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
-using FluentAssertions;
+using CSharpFunctionalExtensions;
 using Moq;
-using Reductech.EDR.Core;
-using Reductech.EDR.Core.Internal;
+using Reductech.EDR.Core.Entities;
 using Reductech.EDR.Core.TestHarness;
 using Xunit;
+using Entity = Reductech.EDR.Core.Entity;
 
 namespace Reductech.EDR.Connectors.Pwsh.Tests
 {
@@ -75,6 +75,13 @@ namespace Reductech.EDR.Connectors.Pwsh.Tests
             Assert.Contains(logger.LoggedValues, o => o.Equals("error"));
             Assert.Contains(logger.LoggedValues, o => o.Equals("warning"));
         }
+        
+        [Fact]
+        public void EntityFromPSObject_WhenPSObjectIsNull_Throws()
+        {
+            var err = Assert.Throws<NullReferenceException>(() => PwshRunner.EntityFromPSObject(null!));
+            Assert.Matches("cannot be null", err.Message);
+        }
 
         [Fact]
         public void EntityFromPSObject_WhenBaseObjectIsPSO_ReturnsMultiValueEntity()
@@ -87,8 +94,8 @@ namespace Reductech.EDR.Connectors.Pwsh.Tests
 
             Assert.NotNull(entity);
 
-            entity.TryGetValue("prop1", out var val1);
-            entity.TryGetValue("prop2", out var val2);
+            var val1 = entity.TryGetValue("prop1").Map(x => x.GetString());
+            var val2 = entity.TryGetValue("prop2").Map(x => x.GetString());
 
             Assert.Equal(2, entity.Count());
             Assert.Equal("value1", val1!.ToString());
@@ -108,19 +115,9 @@ namespace Reductech.EDR.Connectors.Pwsh.Tests
 
             Assert.NotNull(entity);
 
-            entity.TryGetValue(Entity.PrimitiveKey, out var val);
+            var val = entity.TryGetValue(Entity.PrimitiveKey).Value;
 
-            Assert.NotNull(val);
-
-            val!.Value.AsT1.Value.Switch(
-                s => _ = expected.Should().BeOfType<string>().Which.Equals(s),
-                i => _ = expected.Should().BeOfType<int>().Which.Equals(i),
-                d => _ = expected.Should().BeOfType<double>().Which.Equals(d),
-                b => _ = expected.Should().BeOfType<bool>().Which.Equals(b),
-                e => _ = expected.Should().BeOfType<Enumeration>().Which.Equals(e),
-                dt => _ = expected.Should().BeOfType<DateTime>().Which.Equals(dt),
-                ent => _ = expected.Should().BeOfType<Entity>().Which.Equals(ent)
-            );
+            Assert.Equal(expected, val.Value.Value);
         }
 
         [Fact]
@@ -135,13 +132,13 @@ namespace Reductech.EDR.Connectors.Pwsh.Tests
             var entity = PwshRunner.EntityFromPSObject(pso);
 
             Assert.NotNull(entity);
-
-            entity.TryGetValue("prop1", out var val1);
-            entity.TryGetValue("prop2", out var val2);
+            
+            var val1 = entity.TryGetValue("prop1").Map(x => x.GetString());
+            var val2 = entity.TryGetValue("prop2").Bind(x => x.TryGetInt());
 
             Assert.Equal(2, entity.Count());
-            Assert.Equal("value1", val1!.ToString());
-            Assert.Equal(2, val2!.Value.AsT1.Value.AsT1);
+            Assert.Equal("value1", val1);
+            Assert.Equal(2, val2);
         }
 
         [Fact]
@@ -154,12 +151,12 @@ namespace Reductech.EDR.Connectors.Pwsh.Tests
             var result = await PwshRunner.GetEntityEnumerable(script, logger).ToListAsync();
 
             Assert.Single(result);
+            
+            var val1 = result[0].TryGetValue("prop1").Map(x => x.GetString());
+            var val2 = result[0].TryGetValue("prop2").Bind(x => x.TryGetInt());
 
-            result[0].TryGetValue("prop1", out var val1);
-            result[0].TryGetValue("prop2", out var val2);
-
-            Assert.Equal("value1", val1!.ToString());
-            Assert.Equal(2, val2!.Value.AsT1.Value.AsT1);
+            Assert.Equal("value1", val1);
+            Assert.Equal(2, val2);
         }
 
         [Fact]
@@ -172,14 +169,10 @@ namespace Reductech.EDR.Connectors.Pwsh.Tests
 
             Assert.NotNull(entity);
 
-            entity.TryGetValue(Entity.PrimitiveKey, out var val);
-
-            Assert.NotNull(val);
-
-            var actual = val!.Value.AsT2.ToArray();
-
-            Assert.Equal(arr[0], actual[0].Value.AsT0);
-            Assert.Equal(arr[1], actual[1].Value.AsT1);
+            var actual = entity.TryGetValue(Entity.PrimitiveKey).Bind(x => x.TryGetEntityValueList());
+            
+            Assert.Equal(arr[0], actual.Value[0].ToString());
+            Assert.Equal(arr[1], actual.Value[1].TryGetInt().Value);
         }
 
         [Fact]
@@ -192,15 +185,11 @@ namespace Reductech.EDR.Connectors.Pwsh.Tests
             var result = await PwshRunner.GetEntityEnumerable(script, logger).ToListAsync();
 
             Assert.Single(result);
-
-            result[0].TryGetValue(Entity.PrimitiveKey, out var val);
-
-            Assert.NotNull(val);
-
-            var arr = val!.Value.AsT2.ToArray();
-
-            Assert.Equal("value1", arr[0].Value);
-            Assert.Equal(2, arr[1].Value);
+            
+            var actual = result[0].TryGetValue(Entity.PrimitiveKey).Bind(x => x.TryGetEntityValueList());
+            
+            Assert.Equal("value1", actual.Value[0].ToString());
+            Assert.Equal(2, actual.Value[1].TryGetInt().Value);
         }
 
     }

@@ -3,6 +3,7 @@ using Reductech.EDR.Core.Entities;
 using Reductech.EDR.Core.Internal;
 using Reductech.EDR.Core.Steps;
 using Reductech.EDR.Core.TestHarness;
+using static Reductech.EDR.Core.TestHarness.StaticHelpers;
 using Reductech.EDR.Core.Util;
 using System.Collections.Generic;
 using Xunit.Abstractions;
