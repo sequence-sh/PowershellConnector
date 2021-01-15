@@ -19,16 +19,16 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.3" />
-    <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.1.0" />
+    <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.1.1" />
     <PackageReference Include="Moq" Version="4.15.2" />
-    <PackageReference Include="Reductech.EDR.Core.TestHarness" Version="0.4.0-a.master.2012141801" />
+    <PackageReference Include="Reductech.EDR.Core.TestHarness" Version="0.4.0-a.master.2101121826" />
     <PackageReference Include="Reductech.Utilities.Testing" Version="0.1.1" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="coverlet.collector" Version="1.3.0">
+    <PackageReference Include="coverlet.collector" Version="3.0.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
