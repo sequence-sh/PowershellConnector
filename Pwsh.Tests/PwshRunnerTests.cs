@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
 using CSharpFunctionalExtensions;
+using MELT;
 using Moq;
 using Reductech.EDR.Core.Entities;
-using Reductech.EDR.Core.TestHarness;
 using Xunit;
 using Entity = Reductech.EDR.Core.Entity;
 
@@ -59,7 +59,7 @@ public class PwshRunnerTests
     [Trait("Category", "Integration")]
     public async void RunScript_ReadsDataFromOutputStream()
     {
-        var logger = new TestLogger();
+        var logger = TestLoggerFactory.Create().CreateLogger("Test");
         var script = @"Write-Output 'one'; Write-Output 2";
 
         var result = await PwshRunner.RunScript(script, logger).ToListAsync();
@@ -71,16 +71,16 @@ public class PwshRunnerTests
     [Trait("Category", "Integration")]
     public async void RunScript_LogsErrorsAndWarnings()
     {
-        var logger = new TestLogger();
+        var lf = TestLoggerFactory.Create();
 
         var script =
             @"Write-Output 'one'; Write-Error 'error'; Write-Output 'two'; Write-Warning 'warning'";
 
-        _ = await PwshRunner.RunScript(script, logger).ToListAsync();
+        _ = await PwshRunner.RunScript(script, lf.CreateLogger("Test")).ToListAsync();
 
-        Assert.Equal(2, logger.LoggedValues.Count);
-        Assert.Contains(logger.LoggedValues, o => o.Equals("error"));
-        Assert.Contains(logger.LoggedValues, o => o.Equals("warning"));
+        Assert.Equal(2, lf.Sink.LogEntries.Count());
+        Assert.Contains(lf.Sink.LogEntries, o => o.Message != null && o.Message.Equals("error"));
+        Assert.Contains(lf.Sink.LogEntries, o => o.Message != null && o.Message.Equals("warning"));
     }
 
     [Fact]
@@ -125,7 +125,7 @@ public class PwshRunnerTests
 
         var val = entity.TryGetValue(Entity.PrimitiveKey).Value;
 
-        Assert.Equal(expected, val.Value.Value);
+        Assert.Equal(expected, val.Value);
     }
 
     [Fact]
@@ -149,10 +149,11 @@ public class PwshRunnerTests
     [Trait("Category", "Integration")]
     public async void EntityFromPSObject_WhenBaseObjectIsHashtable_ReturnsEntity_Integration()
     {
-        var logger = new TestLogger();
+        var lf     = TestLoggerFactory.Create();
         var script = @"@{prop1 = 'value1'; prop2 = 2} | Write-Output";
 
-        var result = await PwshRunner.GetEntityEnumerable(script, logger).ToListAsync();
+        var result = await PwshRunner.GetEntityEnumerable(script, lf.CreateLogger("Test"))
+            .ToListAsync();
 
         Assert.Single(result);
 
@@ -183,10 +184,11 @@ public class PwshRunnerTests
     [Trait("Category", "Integration")]
     public async void EntityFromPSObject_WhenBaseObjectIsArray_ReturnsEntity_Integration()
     {
-        var logger = new TestLogger();
+        var lf     = TestLoggerFactory.Create();
         var script = @"Write-Output -NoEnumerate @('value1', 2)";
 
-        var result = await PwshRunner.GetEntityEnumerable(script, logger).ToListAsync();
+        var result = await PwshRunner.GetEntityEnumerable(script, lf.CreateLogger("Test"))
+            .ToListAsync();
 
         Assert.Single(result);
 
