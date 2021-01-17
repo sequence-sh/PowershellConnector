@@ -3,6 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management.Automation;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using CSharpFunctionalExtensions;
 using MELT;
 using Moq;
@@ -81,6 +84,39 @@ public class PwshRunnerTests
         Assert.Equal(2, lf.Sink.LogEntries.Count());
         Assert.Contains(lf.Sink.LogEntries, o => o.Message != null && o.Message.Equals("error"));
         Assert.Contains(lf.Sink.LogEntries, o => o.Message != null && o.Message.Equals("warning"));
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async void RunScript_ReadsDataFromInputStream()
+    {
+        var lf       = TestLoggerFactory.Create();
+        var script   = @"$Input | ForEach { Write-Output $_ }";
+        var expected = new[] { 432, 120, 781, 89, 20 };
+
+        var input = new BufferBlock<object>();
+
+        _ = Task.Run(
+            () =>
+            {
+                foreach (var num in expected)
+                {
+                    input.Post(num);
+                    Thread.Sleep(num);
+                }
+
+                input.Complete();
+            }
+        );
+
+        var result = await PwshRunner.RunScript(script, lf.CreateLogger("Test"), null, input)
+            .ToListAsync();
+
+        await input.Completion;
+
+        var actual = result.Select(o => (int)o.BaseObject).ToArray();
+
+        Assert.Equal(expected, actual);
     }
 
     [Fact]

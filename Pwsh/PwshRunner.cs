@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using Reductech.EDR.Core;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +6,8 @@ using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using Microsoft.Extensions.Logging;
+using Reductech.EDR.Core;
 
 namespace Reductech.EDR.Connectors.Pwsh
 {
@@ -34,7 +34,8 @@ public class PwshRunner
     public static async IAsyncEnumerable<PSObject> RunScript(
         string script,
         ILogger logger,
-        Entity? variables = null)
+        Entity? variables = null,
+        ISourceBlock<object>? inputStream = null)
     {
         var iss = InitialSessionState.CreateDefault();
 
@@ -69,8 +70,29 @@ public class PwshRunner
 
         ps.AddScript(script);
 
+        PSDataCollection<PSObject>? input  = null;
+        Task?                       inTask = null;
+
+        if (inputStream != null)
+        {
+            input = new PSDataCollection<PSObject>();
+
+            inTask = Task.Run(
+                async () =>
+                {
+                    while (await inputStream.OutputAvailableAsync())
+                    {
+                        var o = await inputStream.ReceiveAsync();
+                        input.Add(new PSObject(o));
+                    }
+
+                    input.Complete();
+                }
+            );
+        }
+
         var psTask = Task.Factory.FromAsync(
-            ps.BeginInvoke<PSObject, PSObject>(null, output),
+            ps.BeginInvoke<PSObject, PSObject>(input, output),
             end =>
             {
                 ps.EndInvoke(end);
@@ -81,15 +103,19 @@ public class PwshRunner
         while (await buffer.OutputAvailableAsync())
             yield return await buffer.ReceiveAsync();
 
+        if (inTask != null)
+            await inTask;
+
         await psTask;
     }
 
     public static async IAsyncEnumerable<Entity> GetEntityEnumerable(
         string script,
         ILogger logger,
-        Entity? variables = null)
+        Entity? variables = null,
+        ISourceBlock<object>? inputStream = null)
     {
-        await foreach (var pso in RunScript(script, logger, variables))
+        await foreach (var pso in RunScript(script, logger, variables, inputStream))
             yield return EntityFromPSObject(pso);
     }
 
