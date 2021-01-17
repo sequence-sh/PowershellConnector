@@ -2,12 +2,9 @@
 using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
-using Microsoft.Extensions.Logging.Abstractions;
-using Reductech.EDR.Core.Entities;
 using Reductech.EDR.Core.Attributes;
 using Reductech.EDR.Core.Internal;
 using Reductech.EDR.Core.Internal.Errors;
-using Reductech.EDR.Core.Parser;
 
 namespace Reductech.EDR.Connectors.Pwsh
 {
@@ -17,17 +14,17 @@ using Reductech.EDR.Core;
 /// <summary>
 /// 
 /// </summary>
-public sealed class PwshRunScript : CompoundStep<EntityStream>
+public sealed class PwshRunScript : CompoundStep<Array<Entity>>
 {
     /// <inheritdoc />
-    public override async Task<Result<EntityStream, IError>> Run(
+    protected override async Task<Result<Array<Entity>, IError>> Run(
         IStateMonad stateMonad,
         CancellationToken cancellationToken)
     {
         var script = await Script.Run(stateMonad, cancellationToken).Map(x => x.GetStringAsync());
 
         if (script.IsFailure)
-            return script.ConvertFailure<EntityStream>();
+            return script.ConvertFailure<Array<Entity>>();
 
         Entity? vars = null;
 
@@ -36,15 +33,15 @@ public sealed class PwshRunScript : CompoundStep<EntityStream>
             var variables = await Variables.Run(stateMonad, cancellationToken);
 
             if (variables.IsFailure)
-                return variables.ConvertFailure<EntityStream>();
+                return variables.ConvertFailure<Array<Entity>>();
 
             vars = variables.Value;
         }
 
-        var stream       = PwshRunner.GetEntityEnumerable(script.Value, stateMonad.Logger, vars);
-        var entityStream = new EntityStream(stream);
+        var stream = PwshRunner.GetEntityEnumerable(script.Value, stateMonad.Logger, vars)
+            .ToSequence();
 
-        return entityStream;
+        return stream;
     }
 
     /// <summary>
@@ -66,7 +63,7 @@ public sealed class PwshRunScript : CompoundStep<EntityStream>
     ///// </summary>
     //[StepProperty]
     //[DefaultValueExplanation("")]
-    //public IStep<EntityStream> InputStream { get; set; } = null!;
+    //public IStep<Array<Entity>> InputStream { get; set; } = null!;
 
     /// <inheritdoc />
     public override IStepFactory StepFactory => PwshRunScriptStepFactory.Instance;
@@ -75,14 +72,14 @@ public sealed class PwshRunScript : CompoundStep<EntityStream>
 /// <summary>
 /// Executes a powershell script
 /// </summary>
-public sealed class PwshRunScriptStepFactory : SimpleStepFactory<PwshRunScript, EntityStream>
+public sealed class PwshRunScriptStepFactory : SimpleStepFactory<PwshRunScript, Array<Entity>>
 {
     private PwshRunScriptStepFactory() { }
 
     /// <summary>
     /// The instance.
     /// </summary>
-    public static SimpleStepFactory<PwshRunScript, EntityStream> Instance { get; } =
+    public static SimpleStepFactory<PwshRunScript, Array<Entity>> Instance { get; } =
         new PwshRunScriptStepFactory();
 }
 

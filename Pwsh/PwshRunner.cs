@@ -41,7 +41,7 @@ public class PwshRunner
         if (variables != null)
         {
             var vars = variables.Select(
-                v => new SessionStateVariableEntry(v.Name, v.BestValue, string.Empty)
+                v => new SessionStateVariableEntry(v.Name, v.BestValue.Value, string.Empty)
             );
 
             iss.Variables.Add(vars);
@@ -110,17 +110,14 @@ public class PwshRunner
             }
             case Hashtable ht:
             {
-                var list = new List<(string, object)>();
+                var list = new List<(string, object?)>();
 
                 foreach (var key in ht.Keys)
-                    list.Add((key.ToString()!, ht[key]!));
+                    list.Add((key.ToString()!, ht[key]));
 
                 entity = Entity.Create(list);
                 break;
             }
-            case object[] arr:
-                entity = Entity.Create((Entity.PrimitiveKey, arr));
-                break;
             default:
                 entity = Entity.Create((Entity.PrimitiveKey, pso.BaseObject));
                 break;
