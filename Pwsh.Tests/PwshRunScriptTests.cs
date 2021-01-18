@@ -106,6 +106,28 @@ public class PwshRunScriptTests : StepTestBase<PwshRunScript, Array<Entity>>
                 "(value: \"ABC\")",
                 "(value: \"DEF\")"
             );
+
+            yield return new StepCase(
+                "Run PowerShell with an Input",
+                new ForEach<Entity>()
+                {
+                    Array = new PwshRunScript
+                    {
+                        Script = Constant(@"$Input | ForEach-Object { Write-Output $_ }"),
+                        Input = Array(
+                            CreateEntity(("key1", 1), ("key2", "two")),
+                            CreateEntity(("key3", 3), ("key4", new[] { "four", "forty" }))
+                        )
+                    },
+                    Action = new Print<Entity>
+                    {
+                        Value = new GetVariable<Entity> { Variable = VariableName.Entity }
+                    }
+                },
+                Unit.Default,
+                "(key1: 1 key2: \"two\")",
+                "(key3: 3 key4: [\"four\", \"forty\"])"
+            );
         }
     }
 
@@ -124,6 +146,24 @@ public class PwshRunScriptTests : StepTestBase<PwshRunScript, Array<Entity>>
                 "(prop1: \"one\" prop2: 2)",
                 "(prop1: \"three\" prop2: 4)"
             );
+
+            yield return new DeserializeCase(
+                "Run script that takes an entity array as input and prints results",
+                @"
+- <Input> = [
+    (prop1: ""value1"" prop2: 2),
+    (prop1: ""value3"" prop2: 4)
+  ]
+- ForEach
+    Array: (PwshRunScript
+        Script: ""$input | ForEach-Object { Write-Output $_ }""
+        Input: <Input>
+    )
+    Action: (Print (GetVariable <entity>))",
+                Unit.Default,
+                "(prop1: \"value1\" prop2: 2)",
+                "(prop1: \"value3\" prop2: 4)"
+            ) { IgnoreFinalState = true };
         }
     }
 }
