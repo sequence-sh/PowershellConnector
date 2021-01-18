@@ -35,7 +35,7 @@ public class PwshRunner
         string script,
         ILogger logger,
         Entity? variables = null,
-        ISourceBlock<object>? inputStream = null)
+        PSDataCollection<PSObject>? input = null)
     {
         var iss = InitialSessionState.CreateDefault();
 
@@ -70,27 +70,6 @@ public class PwshRunner
 
         ps.AddScript(script);
 
-        PSDataCollection<PSObject>? input  = null;
-        Task?                       inTask = null;
-
-        if (inputStream != null)
-        {
-            input = new PSDataCollection<PSObject>();
-
-            inTask = Task.Run(
-                async () =>
-                {
-                    while (await inputStream.OutputAvailableAsync())
-                    {
-                        var o = await inputStream.ReceiveAsync();
-                        input.Add(new PSObject(o));
-                    }
-
-                    input.Complete();
-                }
-            );
-        }
-
         var psTask = Task.Factory.FromAsync(
             ps.BeginInvoke<PSObject, PSObject>(input, output),
             end =>
@@ -103,9 +82,6 @@ public class PwshRunner
         while (await buffer.OutputAvailableAsync())
             yield return await buffer.ReceiveAsync();
 
-        if (inTask != null)
-            await inTask;
-
         await psTask;
     }
 
@@ -113,9 +89,9 @@ public class PwshRunner
         string script,
         ILogger logger,
         Entity? variables = null,
-        ISourceBlock<object>? inputStream = null)
+        PSDataCollection<PSObject>? input = null)
     {
-        await foreach (var pso in RunScript(script, logger, variables, inputStream))
+        await foreach (var pso in RunScript(script, logger, variables, input))
             yield return EntityFromPSObject(pso);
     }
 
@@ -131,13 +107,14 @@ public class PwshRunner
             case PSObject _:
             case PSCustomObject _:
             {
-                entity = Entity.Create(pso.Properties.Select(p => (p.Name, p.Value)));
+                entity = Entity.Create(pso.Properties.Select(p => (p.Name, p.Value))!);
                 break;
             }
             case Hashtable ht:
             {
                 var list = new List<(string, object?)>();
 
+                // TODO: warning if value is not a primitive
                 foreach (var key in ht.Keys)
                     list.Add((key.ToString()!, ht[key]));
 
