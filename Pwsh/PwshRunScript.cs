@@ -17,6 +17,9 @@ using Reductech.EDR.Core.Attributes;
 /// Executes a powershell script and returns any results written to the pipeline
 /// as an entity stream.
 /// </summary>
+[Alias("PwshRun")]
+[Alias("PowerShellRun")]
+[Alias("PowerShellRunScript")]
 public sealed class PwshRunScript : CompoundStep<Array<Entity>>
 {
     /// <inheritdoc />
@@ -82,6 +85,7 @@ public sealed class PwshRunScript : CompoundStep<Array<Entity>>
     /// </summary>
     [StepProperty(order: 2)]
     [DefaultValueExplanation("No variables passed to the script")]
+    [Alias("SetVariables")]
     public IStep<Entity>? Variables { get; set; } = null;
 
     /// <summary>
