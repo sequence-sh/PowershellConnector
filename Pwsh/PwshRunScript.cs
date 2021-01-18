@@ -1,82 +1,118 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Management.Automation;
 using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
-using Reductech.EDR.Core.Entities;
-using Reductech.EDR.Core.Attributes;
 using Reductech.EDR.Core.Internal;
 using Reductech.EDR.Core.Internal.Errors;
-using Reductech.EDR.Core.Parser;
+using Reductech.EDR.Core.Util;
 
 namespace Reductech.EDR.Connectors.Pwsh
 {
-    using Reductech.EDR.Core;
-    
-    /// <summary>
-    /// 
-    /// </summary>
-    public sealed class PwshRunScript : CompoundStep<EntityStream>
+
+using Reductech.EDR.Core;
+using Reductech.EDR.Core.Attributes;
+
+/// <summary>
+/// Executes a powershell script and returns any results written to the pipeline
+/// as an entity stream.
+/// </summary>
+[Alias("PwshRun")]
+[Alias("PowerShellRun")]
+[Alias("PowerShellRunScript")]
+public sealed class PwshRunScript : CompoundStep<Array<Entity>>
+{
+    /// <inheritdoc />
+    protected override async Task<Result<Array<Entity>, IError>> Run(
+        IStateMonad stateMonad,
+        CancellationToken cancellationToken)
     {
+        var script = await Script.Run(stateMonad, cancellationToken).Map(x => x.GetStringAsync());
 
-        /// <inheritdoc />
-        public override async Task<Result<EntityStream, IError>> Run(IStateMonad stateMonad, CancellationToken cancellationToken)
+        if (script.IsFailure)
+            return script.ConvertFailure<Array<Entity>>();
+
+        Entity? vars = null;
+
+        if (Variables != null)
         {
-            var script = await Script.Run(stateMonad, cancellationToken).Map(x => x.GetStringAsync());
+            var variables = await Variables.Run(stateMonad, cancellationToken);
 
-            if (script.IsFailure)
-                return script.ConvertFailure<EntityStream>();
+            if (variables.IsFailure)
+                return variables.ConvertFailure<Array<Entity>>();
 
-            Entity? vars = null;
-            
-            if (Variables != null)
-            {
-                var variables = await Variables.Run(stateMonad, cancellationToken);
-                if (variables.IsFailure)
-                    return variables.ConvertFailure<EntityStream>();
-                vars = variables.Value;
-            }
-
-            var stream = PwshRunner.GetEntityEnumerable(script.Value, stateMonad.Logger, vars);
-            var entityStream = new EntityStream(stream);
-
-            return entityStream;
+            vars = variables.Value;
         }
 
-        /// <summary>
-        /// The script to run
-        /// </summary>
-        [StepProperty(order: 1)]
-        [Required]
-        public IStep<StringStream> Script { get; set; } = null!;
+        PSDataCollection<PSObject>? input = null;
 
-        /// <summary>
-        /// List of input variables and corresponding values.
-        /// </summary>
-        [StepProperty(order: 2)]
-        [DefaultValueExplanation("No variables passed to the script")]
-        public IStep<Entity>? Variables { get; set; } = null;
+        #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        async ValueTask<Result<Unit, IError>> AddObject(Entity x, CancellationToken ct)
+        {
+            input.Add(PwshRunner.PSObjectFromEntity(x));
+            return Unit.Default;
+        }
+        #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        //[StepProperty]
-        //[DefaultValueExplanation("")]
-        //public IStep<EntityStream> InputStream { get; set; } = null!;
+        if (Input != null)
+        {
+            var inputStream = await Input.Run(stateMonad, cancellationToken);
 
-        /// <inheritdoc />
-        public override IStepFactory StepFactory => PwshRunScriptStepFactory.Instance;
+            if (inputStream.IsFailure)
+                return inputStream.ConvertFailure<Array<Entity>>();
+
+            input = new PSDataCollection<PSObject>();
+
+            _ = inputStream.Value.ForEach(AddObject, cancellationToken)
+                .ContinueWith(_ => input.Complete(), cancellationToken);
+        }
+
+        var stream = PwshRunner.GetEntityEnumerable(script.Value, stateMonad.Logger, vars, input)
+            .ToSequence();
+
+        return stream;
     }
 
     /// <summary>
-    /// Executes a powershell script
+    /// The script to run
     /// </summary>
-    public sealed class PwshRunScriptStepFactory : SimpleStepFactory<PwshRunScript, EntityStream>
-    {
-        private PwshRunScriptStepFactory() { }
+    [StepProperty(order: 1)]
+    [Required]
+    public IStep<StringStream> Script { get; set; } = null!;
 
-        /// <summary>
-        /// The instance.
-        /// </summary>
-        public static SimpleStepFactory<PwshRunScript, EntityStream> Instance { get; } = new PwshRunScriptStepFactory();
-    }
+    /// <summary>
+    /// List of input variables and corresponding values.
+    /// </summary>
+    [StepProperty(order: 2)]
+    [DefaultValueExplanation("No variables passed to the script")]
+    [Alias("SetVariables")]
+    public IStep<Entity>? Variables { get; set; } = null;
+
+    /// <summary>
+    /// Input stream, used to pipeline data to the Script.
+    /// This stream is exposed via the automatic variable $input.
+    /// </summary>
+    [StepProperty(order: 3)]
+    [DefaultValueExplanation("No input stream")]
+    [Alias("InputStream")]
+    public IStep<Array<Entity>>? Input { get; set; } = null;
+
+    /// <inheritdoc />
+    public override IStepFactory StepFactory => PwshRunScriptStepFactory.Instance;
+}
+
+/// <summary>
+/// Executes a powershell script
+/// </summary>
+public sealed class PwshRunScriptStepFactory : SimpleStepFactory<PwshRunScript, Array<Entity>>
+{
+    private PwshRunScriptStepFactory() { }
+
+    /// <summary>
+    /// The instance.
+    /// </summary>
+    public static SimpleStepFactory<PwshRunScript, Array<Entity>> Instance { get; } =
+        new PwshRunScriptStepFactory();
+}
+
 }
