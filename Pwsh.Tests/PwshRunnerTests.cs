@@ -5,7 +5,6 @@ using System.Linq;
 using System.Management.Automation;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
 using CSharpFunctionalExtensions;
 using MELT;
 using Moq;
@@ -92,16 +91,16 @@ public class PwshRunnerTests
     {
         var lf       = TestLoggerFactory.Create();
         var script   = @"$Input | ForEach { Write-Output $_ }";
-        var expected = new[] { 432, 120, 781, 89, 20 };
+        var expected = new[] { 32, 120, 71, 89, 20 };
 
-        var input = new BufferBlock<object>();
+        var input = new PSDataCollection<PSObject>(5);
 
         _ = Task.Run(
             () =>
             {
                 foreach (var num in expected)
                 {
-                    input.Post(num);
+                    input.Add(num);
                     Thread.Sleep(num);
                 }
 
@@ -111,8 +110,6 @@ public class PwshRunnerTests
 
         var result = await PwshRunner.RunScript(script, lf.CreateLogger("Test"), null, input)
             .ToListAsync();
-
-        await input.Completion;
 
         var actual = result.Select(o => (int)o.BaseObject).ToArray();
 
@@ -233,6 +230,66 @@ public class PwshRunnerTests
 
         Assert.Equal("value1", actual.Value[0].ToString());
         Assert.Equal(2,        actual.Value[1].TryGetInt().Value);
+    }
+
+    [Theory]
+    [InlineData("hello")]
+    [InlineData(123)]
+    [InlineData(1.5)]
+    [InlineData(true)]
+    public void PSObjectFromEntity_WhenEntityIsAPrimitive_ReturnsPsObject(object expected)
+    {
+        var entity = Entity.Create((Entity.PrimitiveKey, expected));
+
+        var actual = PwshRunner.PSObjectFromEntity(entity);
+
+        Assert.IsType<PSObject>(actual);
+        Assert.Equal(expected, actual.BaseObject);
+    }
+
+    [Fact]
+    public void PSObjectFromEntity_WhenEntityIsNotAPrimitive_SetsPSObjectProperties()
+    {
+        var entity = Entity.Create(
+            ("string", "value1"),
+            ("int", 2),
+            ("double", 3.3),
+            ("bool", true),
+            ("enum", SchemaPropertyType.Entity),
+            ("date", new DateTime(2020, 12, 12))
+        );
+
+        var actual = PwshRunner.PSObjectFromEntity(entity);
+
+        Assert.IsType<PSObject>(actual);
+
+        foreach (var prop in entity)
+            Assert.Equal(prop.BaseValue.Value, actual.Properties[prop.Name].Value);
+    }
+
+    [Fact]
+    public void PSObjectFromEntity_WhenEntityValueIsEntity_ConvertsToPSObject()
+    {
+        var key    = "entity";
+        var entity = Entity.Create((key, Entity.Create(("key", "value"))));
+
+        var actual = PwshRunner.PSObjectFromEntity(entity);
+
+        Assert.IsType<PSObject>(actual);
+        Assert.IsType<PSObject>(actual.Properties[key].Value);
+        Assert.Equal("value", ((PSObject)actual.Properties[key].Value).Properties["key"].Value);
+    }
+
+    [Fact]
+    public void PSObjectFromEntity_WhenEntityValueIsEntityValueList_ConvertsToObjectList()
+    {
+        var expected = new object[] { 1, "item2" };
+        var entity   = Entity.Create(("list", expected));
+
+        var actual = PwshRunner.PSObjectFromEntity(entity);
+
+        Assert.IsType<PSObject>(actual);
+        Assert.Equal(expected, actual.Properties["list"].Value);
     }
 }
 
