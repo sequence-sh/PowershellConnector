@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using Microsoft.Extensions.Logging;
 using Reductech.EDR.Core;
+using Reductech.EDR.Core.Entities;
 
 namespace Reductech.EDR.Connectors.Pwsh
 {
@@ -127,6 +128,33 @@ public class PwshRunner
         }
 
         return entity;
+    }
+
+    public static PSObject PSObjectFromEntity(Entity entity)
+    {
+        var single = entity.TryGetValue(Entity.PrimitiveKey);
+
+        if (single.HasValue)
+            return new PSObject(single.Value.Value);
+
+        var pso = new PSObject();
+
+        static object? GetValue(EntityValue ev) => ev.Match(
+            _ => null as object,
+            s => s,
+            i => i,
+            d => d,
+            b => b,
+            e => e,
+            dt => dt,
+            entity => PSObjectFromEntity(entity),
+            list => list.Select(GetValue).ToList()
+        );
+
+        foreach (var e in entity)
+            pso.Properties.Add(new PSNoteProperty(e.Name, GetValue(e.BestValue)));
+
+        return pso;
     }
 }
 
