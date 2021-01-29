@@ -5,16 +5,12 @@ using Reductech.EDR.Core.TestHarness;
 using static Reductech.EDR.Core.TestHarness.StaticHelpers;
 using Reductech.EDR.Core.Util;
 using System.Collections.Generic;
-using Xunit.Abstractions;
 
 namespace Reductech.EDR.Connectors.Pwsh.Tests
 {
 
-public class PwshRunScriptTests : StepTestBase<PwshRunScript, Array<Entity>>
+public partial class PwshRunScriptTests : StepTestBase<PwshRunScript, Array<Entity>>
 {
-    /// <inheritdoc />
-    public PwshRunScriptTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper) { }
-
     /// <inheritdoc />
     protected override IEnumerable<StepCase> StepCases
     {
