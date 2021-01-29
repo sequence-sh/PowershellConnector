@@ -6,7 +6,7 @@
     <RootNamespace>Reductech.EDR.Connectors.Pwsh</RootNamespace>
     <AssemblyName>Reductech.EDR.Connectors.Pwsh</AssemblyName>
     <Nullable>enable</Nullable>
-    <Version>0.1.0$(VersionSuffix)</Version>
+    <Version>0.4.0$(VersionSuffix)</Version>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -18,17 +18,17 @@
 
     <PackageProjectUrl>https://gitlab.com/reductech/edr/connectors/pwsh</PackageProjectUrl>
     <RepositoryUrl>https://gitlab.com/reductech/edr/connectors/pwsh</RepositoryUrl>
-    <PackageReleaseNotes>Please see https://gitlab.com/reductech/edr/connectors/pwsh/-/releases</PackageReleaseNotes>
+    <PackageReleaseNotes>CHANGELOG.md</PackageReleaseNotes>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     
-    <Authors>reductech</Authors>
+    <Authors>Reductech</Authors>
     <Company>Reductech</Company>
-    <Copyright>Copyright (c) 2020 Reductech Ltd</Copyright>
+    <Copyright>Copyright (c) 2021 Reductech Ltd</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.1.1" />
-    <PackageReference Include="Reductech.EDR.Core" Version="0.4.0-a.master.2101121826" />
+    <PackageReference Include="Reductech.EDR.Core" Version="0.4.0" />
   </ItemGroup>
 
 </Project>
