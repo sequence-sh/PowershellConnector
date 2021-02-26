@@ -28,7 +28,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.1.1" />
-    <PackageReference Include="Reductech.EDR.Core" Version="0.4.0" />
+    <PackageReference Include="Reductech.EDR.Core" Version="0.5.0-a.master.2102261237" />
   </ItemGroup>
 
 </Project>
