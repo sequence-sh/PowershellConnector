@@ -21,7 +21,7 @@ public partial class PwshRunScriptTests : StepTestBase<PwshRunScript, Array<Enti
                 new ForEach<Entity>()
                 {
                     Array = new PwshRunScript { Script = Constant(@"Write-Output 'hello!'") },
-                    Action = new Print<Entity>
+                    Action = new Log<Entity>
                     {
                         Value = new GetVariable<Entity> { Variable = VariableName.Entity }
                     }
@@ -35,7 +35,7 @@ public partial class PwshRunScriptTests : StepTestBase<PwshRunScript, Array<Enti
                 new ForEach<Entity>()
                 {
                     Array = new PwshRunScript { Script = Constant(@"Write-Warning 'warning'") },
-                    Action = new Print<Entity>
+                    Action = new Log<Entity>
                     {
                         Value = new GetVariable<Entity> { Variable = VariableName.Entity }
                     }
@@ -49,7 +49,7 @@ public partial class PwshRunScriptTests : StepTestBase<PwshRunScript, Array<Enti
                 new ForEach<Entity>()
                 {
                     Array = new PwshRunScript { Script = Constant(@"1..3 | Write-Output") },
-                    Action = new Print<Entity>
+                    Action = new Log<Entity>
                     {
                         Value = new GetVariable<Entity> { Variable = VariableName.Entity }
                     }
@@ -70,7 +70,7 @@ public partial class PwshRunScriptTests : StepTestBase<PwshRunScript, Array<Enti
                             @"[pscustomobject]@{ prop1 = 'one' ; prop2 = 2 } | Write-Output"
                         )
                     },
-                    Action = new Print<Entity>
+                    Action = new Log<Entity>
                     {
                         Value = new GetVariable<Entity> { Variable = VariableName.Entity }
                     }
@@ -87,13 +87,13 @@ public partial class PwshRunScriptTests : StepTestBase<PwshRunScript, Array<Enti
                     {
                         Script = Constant(@"$var1, $var2 | Write-Output"),
                         Variables = Constant(
-                            CreateEntity(
+                            Entity.Create(
                                 ("var1", "ABC"),
                                 ("var2", "DEF")
                             )
                         )
                     },
-                    Action = new Print<Entity>
+                    Action = new Log<Entity>
                     {
                         Value = new GetVariable<Entity> { Variable = VariableName.Entity }
                     }
@@ -105,17 +105,17 @@ public partial class PwshRunScriptTests : StepTestBase<PwshRunScript, Array<Enti
 
             yield return new StepCase(
                 "Run PowerShell with an Input",
-                new ForEach<Entity>()
+                new ForEach<Entity>
                 {
                     Array = new PwshRunScript
                     {
                         Script = Constant(@"$Input | ForEach-Object { Write-Output $_ }"),
                         Input = Array(
-                            CreateEntity(("key1", 1), ("key2", "two")),
-                            CreateEntity(("key3", 3), ("key4", new[] { "four", "forty" }))
+                            Entity.Create(("key1", 1), ("key2", "two")),
+                            Entity.Create(("key3", 3), ("key4", new[] { "four", "forty" }))
                         )
                     },
-                    Action = new Print<Entity>
+                    Action = new Log<Entity>
                     {
                         Value = new GetVariable<Entity> { Variable = VariableName.Entity }
                     }
@@ -137,7 +137,7 @@ public partial class PwshRunScriptTests : StepTestBase<PwshRunScript, Array<Enti
                 @"
 - ForEach
     Array: (PwshRunScript Script: ""@( [pscustomobject]@{ prop1 = 'one'; prop2 = 2 }, [pscustomobject]@{ prop1 = 'three'; prop2 = 4 }) | Write-Output"")
-    Action: (Print (GetVariable <entity>))",
+    Action: (Log (GetVariable <entity>))",
                 Unit.Default,
                 "(prop1: \"one\" prop2: 2)",
                 "(prop1: \"three\" prop2: 4)"
@@ -155,7 +155,7 @@ public partial class PwshRunScriptTests : StepTestBase<PwshRunScript, Array<Enti
         Script: ""$input | ForEach-Object { Write-Output $_ }""
         Input: <Input>
     )
-    Action: (Print (GetVariable <entity>))",
+    Action: (Log (GetVariable <entity>))",
                 Unit.Default,
                 "(prop1: \"value1\" prop2: 2)",
                 "(prop1: \"value3\" prop2: 4)"

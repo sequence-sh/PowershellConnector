@@ -108,7 +108,7 @@ public class PwshRunner
             case PSObject _:
             case PSCustomObject _:
             {
-                entity = Entity.Create(pso.Properties.Select(p => (p.Name, p.Value))!);
+                entity = Entity.Create(pso.Properties.Select(p => (p.Name, p.Value)).ToArray()!);
                 break;
             }
             case Hashtable ht:
@@ -119,7 +119,7 @@ public class PwshRunner
                 foreach (var key in ht.Keys)
                     list.Add((key.ToString()!, ht[key]));
 
-                entity = Entity.Create(list);
+                entity = Entity.Create(list.ToArray());
                 break;
             }
             default:
