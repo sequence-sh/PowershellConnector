@@ -1,7 +1,3 @@
-[![pipeline status](https://gitlab.com/reductech/edr/connectors/pwsh/badges/master/pipeline.svg)](https://gitlab.com/reductech/edr/connectors/pwsh/-/commits/master)
-[![coverage report](https://gitlab.com/reductech/edr/connectors/pwsh/badges/master/coverage.svg)](https://gitlab.com/reductech/edr/connectors/pwsh/-/commits/master)
-[![Gitter](https://badges.gitter.im/reductech/community.svg)](https://gitter.im/reductech/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
-
 # EDR PowerShell Connector
 
 [Reductech EDR](https://gitlab.com/reductech/edr) is a collection of

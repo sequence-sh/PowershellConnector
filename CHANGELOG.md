@@ -1,3 +1,15 @@
+# v0.5.0 (2021-03-01)
+
+## Summary of Changes
+
+- Structured logging
+
+## Issues Closed in this Release
+
+### New Features
+
+- Update the version of Core to allow structed logging #6
+
 ## v0.4.0 (2021-01-29)
 
 First release. Version numbers are aligned across `EDR`.
