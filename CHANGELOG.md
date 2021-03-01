@@ -2,6 +2,8 @@
 
 ## Summary of Changes
 
+- Structured logging
+
 ## Issues Closed in this Release
 
 ### New Features
