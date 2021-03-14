@@ -3,7 +3,7 @@
 [Reductech EDR](https://gitlab.com/reductech/edr) is a collection of
 libraries that automates cross-application e-discovery and forensic workflows.
 
-The PowerShell connector containes Steps for executing inline PowerShell scripts in
+The PowerShell connector contains Steps for executing inline PowerShell scripts in
 Sequences.
 
 ## Examples
@@ -38,7 +38,7 @@ the command line tool for running Sequences.
 
 ## Documentation
 
-- Documentation is available here: https://docs.reductech.io
+Documentation is available here: https://docs.reductech.io
 
 ## E-discovery Reduct
 

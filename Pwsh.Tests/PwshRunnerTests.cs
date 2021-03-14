@@ -255,7 +255,7 @@ public class PwshRunnerTests
             ("int", 2),
             ("double", 3.3),
             ("bool", true),
-            ("enum", SchemaPropertyType.Entity),
+            ("enum", Core.SCLType.Enum),
             ("date", new DateTime(2020, 12, 12))
         );
 
