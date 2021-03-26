@@ -1,3 +1,7 @@
+# v0.7.0 (2021-03-26)
+
+- Update of Core dependencies only
+
 # v0.6.0 (2021-03-14)
 
 - Update of Core dependencies only
