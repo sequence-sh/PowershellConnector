@@ -43,7 +43,7 @@ public class PwshRunner
         if (variables != null)
         {
             var vars = variables.Select(
-                v => new SessionStateVariableEntry(v.Name, v.BestValue.Value, string.Empty)
+                v => new SessionStateVariableEntry(v.Name, v.BestValue, string.Empty)
             );
 
             iss.Variables.Add(vars);
@@ -135,21 +135,17 @@ public class PwshRunner
         var single = entity.TryGetValue(Entity.PrimitiveKey);
 
         if (single.HasValue)
-            return new PSObject(single.Value.Value);
+            return new PSObject(single.Value.ObjectValue);
 
         var pso = new PSObject();
 
-        static object? GetValue(EntityValue ev) => ev.Match(
-            _ => null as object,
-            s => s,
-            i => i,
-            d => d,
-            b => b,
-            e => e,
-            dt => dt,
-            entity => PSObjectFromEntity(entity),
-            list => list.Select(GetValue).ToList()
-        );
+        static object? GetValue(EntityValue ev) => ev switch
+        {
+            EntityValue.NestedEntity nestedEntity         => PSObjectFromEntity(nestedEntity.Value),
+            EntityValue.EnumerationValue enumerationValue => enumerationValue.Value,
+            EntityValue.NestedList list                   => list.Value.Select(GetValue).ToList(),
+            _                                             => ev.ObjectValue
+        };
 
         foreach (var e in entity)
             pso.Properties.Add(new PSNoteProperty(e.Name, GetValue(e.BestValue)));

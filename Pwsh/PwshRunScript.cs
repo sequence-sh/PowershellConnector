@@ -68,7 +68,7 @@ public sealed class PwshRunScript : CompoundStep<Array<Entity>>
         }
 
         var stream = PwshRunner.GetEntityEnumerable(script.Value, stateMonad.Logger, vars, input)
-            .ToSequence();
+            .ToSCLArray();
 
         return stream;
     }

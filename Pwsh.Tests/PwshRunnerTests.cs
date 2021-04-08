@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Management.Automation;
 using System.Threading;
@@ -135,8 +136,8 @@ public class PwshRunnerTests
 
         Assert.NotNull(entity);
 
-        var val1 = entity.TryGetValue("prop1").Map(x => x.GetString());
-        var val2 = entity.TryGetValue("prop2").Map(x => x.GetString());
+        var val1 = entity.TryGetValue("prop1").Map(x => x.GetPrimitiveString());
+        var val2 = entity.TryGetValue("prop2").Map(x => x.GetPrimitiveString());
 
         Assert.Equal(2,        entity.Count());
         Assert.Equal("value1", val1!.ToString());
@@ -156,9 +157,9 @@ public class PwshRunnerTests
 
         Assert.NotNull(entity);
 
-        var val = entity.TryGetValue(Entity.PrimitiveKey).Value;
+        var val = entity.TryGetValue(Entity.PrimitiveKey).Value.ObjectValue;
 
-        Assert.Equal(expected, val.Value);
+        Assert.Equal(expected, val);
     }
 
     [Fact]
@@ -170,8 +171,8 @@ public class PwshRunnerTests
 
         Assert.NotNull(entity);
 
-        var val1 = entity.TryGetValue("prop1").Map(x => x.GetString());
-        var val2 = entity.TryGetValue("prop2").Bind(x => x.TryGetInt());
+        var val1 = entity.TryGetValue("prop1").Map(x => x.GetPrimitiveString());
+        var val2 = entity.TryGetValue("prop2").Map(x => x.ObjectValue);
 
         Assert.Equal(2,        entity.Count());
         Assert.Equal("value1", val1);
@@ -190,8 +191,8 @@ public class PwshRunnerTests
 
         Assert.Single(result);
 
-        var val1 = result[0].TryGetValue("prop1").Map(x => x.GetString());
-        var val2 = result[0].TryGetValue("prop2").Bind(x => x.TryGetInt());
+        var val1 = result[0].TryGetValue("prop1").Map(x => x.GetPrimitiveString());
+        var val2 = result[0].TryGetValue("prop2").Map(x => x.ObjectValue);
 
         Assert.Equal("value1", val1);
         Assert.Equal(2,        val2);
@@ -207,10 +208,12 @@ public class PwshRunnerTests
 
         Assert.NotNull(entity);
 
-        var actual = entity.TryGetValue(Entity.PrimitiveKey).Bind(x => x.TryGetEntityValueList());
+        var actual =
+            entity.Dictionary[Entity.PrimitiveKey].BestValue.ObjectValue as
+                ImmutableList<EntityValue>;
 
-        Assert.Equal(arr[0], actual.Value[0].ToString());
-        Assert.Equal(arr[1], actual.Value[1].TryGetInt().Value);
+        Assert.Equal(arr[0], actual![0].ObjectValue);
+        Assert.Equal(arr[1], actual![1].ObjectValue);
     }
 
     [Fact]
@@ -225,11 +228,11 @@ public class PwshRunnerTests
 
         Assert.Single(result);
 
-        var actual =
-            result[0].TryGetValue(Entity.PrimitiveKey).Bind(x => x.TryGetEntityValueList());
+        var actual = result[0].Dictionary[Entity.PrimitiveKey].BestValue.ObjectValue as
+            ImmutableList<EntityValue>;
 
-        Assert.Equal("value1", actual.Value[0].ToString());
-        Assert.Equal(2,        actual.Value[1].TryGetInt().Value);
+        Assert.Equal("value1", actual![0].ObjectValue);
+        Assert.Equal(2,        actual![1].ObjectValue);
     }
 
     [Theory]
@@ -264,7 +267,7 @@ public class PwshRunnerTests
         Assert.IsType<PSObject>(actual);
 
         foreach (var prop in entity)
-            Assert.Equal(prop.BaseValue.Value, actual.Properties[prop.Name].Value);
+            Assert.Equal(prop.BestValue.ObjectValue, actual.Properties[prop.Name].Value);
     }
 
     [Fact]
