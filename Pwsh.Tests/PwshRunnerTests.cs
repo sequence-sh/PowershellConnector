@@ -18,6 +18,8 @@ namespace Reductech.EDR.Connectors.Pwsh.Tests
 
 public class PwshRunnerTests
 {
+#region ProcessData
+
     [Fact]
     public void ProcessData_WhenSenderIsNotPSDataCollection_Throws()
     {
@@ -58,6 +60,10 @@ public class PwshRunnerTests
         mock.Verify(m => m.Invoke(str));
     }
 
+#endregion
+
+#region RunScript
+
     [Fact]
     [Trait("Category", "Integration")]
     public async void RunScript_ReadsDataFromOutputStream()
@@ -65,25 +71,26 @@ public class PwshRunnerTests
         var logger = TestLoggerFactory.Create().CreateLogger("Test");
         var script = @"Write-Output 'one'; Write-Output 2";
 
-        var result = await PwshRunner.RunScript(script, logger).ToListAsync();
+        var result = await PwshRunner.RunScript(script, logger);
 
         Assert.Equal(new List<PSObject> { "one", 2 }, result);
     }
 
     [Fact]
     [Trait("Category", "Integration")]
-    public async void RunScript_LogsErrorsAndWarnings()
+    public async void RunScript_LogsErrorsWarningsAndInformation()
     {
         var lf = TestLoggerFactory.Create();
 
         var script =
-            @"Write-Output 'one'; Write-Error 'error'; Write-Output 'two'; Write-Warning 'warning'";
+            @"Write-Output 'one'; Write-Error 'error'; Write-Output 'two'; Write-Warning 'warning'; Write-Information 'info'";
 
-        _ = await PwshRunner.RunScript(script, lf.CreateLogger("Test")).ToListAsync();
+        _ = await PwshRunner.RunScript(script, lf.CreateLogger("Test"));
 
-        Assert.Equal(2, lf.Sink.LogEntries.Count());
+        Assert.Equal(3, lf.Sink.LogEntries.Count());
         Assert.Contains(lf.Sink.LogEntries, o => o.Message != null && o.Message.Equals("error"));
         Assert.Contains(lf.Sink.LogEntries, o => o.Message != null && o.Message.Equals("warning"));
+        Assert.Contains(lf.Sink.LogEntries, o => o.Message != null && o.Message.Equals("info"));
     }
 
     [Fact]
@@ -109,13 +116,133 @@ public class PwshRunnerTests
             }
         );
 
-        var result = await PwshRunner.RunScript(script, lf.CreateLogger("Test"), null, input)
+        var result = await PwshRunner.RunScript(script, lf.CreateLogger("Test"), null, input);
+
+        var actual = result.Select(o => (int)o.BaseObject).ToArray();
+
+        Assert.Equal(expected, actual);
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async void RunScript_CorrectlyPassesVariablesToScript()
+    {
+        var lf = TestLoggerFactory.Create();
+
+        var script = @"1..6 | % { Write-Output (Get-Variable -Name ""Var$_"").Value }";
+
+        var entity = Entity.Create(
+            ("Var1", "value1"),
+            ("Var2", 2),
+            ("Var3", 3.3),
+            ("Var4", true),
+            ("Var5", Core.SCLType.Enum),
+            ("Var6", new DateTime(2020, 12, 12))
+        );
+
+        var result = await PwshRunner.RunScript(script, lf.CreateLogger("Test"), entity, null);
+
+        for (var i = 0; i < entity.Dictionary.Count; i++)
+            Assert.Equal(
+                entity.Dictionary[$"Var{i + 1}"].BestValue.ObjectValue,
+                result[i].BaseObject
+            );
+    }
+
+#endregion
+
+#region RunScriptAsync
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async void RunScriptAsync_ReadsDataFromOutputStream()
+    {
+        var logger = TestLoggerFactory.Create().CreateLogger("Test");
+        var script = @"Write-Output 'one'; Write-Output 2";
+
+        var result = await PwshRunner.RunScriptAsync(script, logger).ToListAsync();
+
+        Assert.Equal(new List<PSObject> { "one", 2 }, result);
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async void RunScriptAsync_LogsErrorsWarningsAndInformation()
+    {
+        var lf = TestLoggerFactory.Create();
+
+        var script =
+            @"Write-Output 'one'; Write-Error 'error'; Write-Output 'two'; Write-Warning 'warning'; Write-Information 'info'";
+
+        _ = await PwshRunner.RunScriptAsync(script, lf.CreateLogger("Test")).ToListAsync();
+
+        Assert.Equal(3, lf.Sink.LogEntries.Count());
+        Assert.Contains(lf.Sink.LogEntries, o => o.Message != null && o.Message.Equals("error"));
+        Assert.Contains(lf.Sink.LogEntries, o => o.Message != null && o.Message.Equals("warning"));
+        Assert.Contains(lf.Sink.LogEntries, o => o.Message != null && o.Message.Equals("info"));
+    }
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async void RunScriptAsync_ReadsDataFromInputStream()
+    {
+        var lf       = TestLoggerFactory.Create();
+        var script   = @"$Input | ForEach { Write-Output $_ }";
+        var expected = new[] { 32, 120, 71, 89, 20 };
+
+        var input = new PSDataCollection<PSObject>(5);
+
+        _ = Task.Run(
+            () =>
+            {
+                foreach (var num in expected)
+                {
+                    input.Add(num);
+                    Thread.Sleep(num);
+                }
+
+                input.Complete();
+            }
+        );
+
+        var result = await PwshRunner.RunScriptAsync(script, lf.CreateLogger("Test"), null, input)
             .ToListAsync();
 
         var actual = result.Select(o => (int)o.BaseObject).ToArray();
 
         Assert.Equal(expected, actual);
     }
+
+    [Fact]
+    [Trait("Category", "Integration")]
+    public async void RunScriptAsync_CorrectlyPassesVariablesToScript()
+    {
+        var lf = TestLoggerFactory.Create();
+
+        var script = @"1..6 | % { Write-Output (Get-Variable -Name ""Var$_"").Value }";
+
+        var entity = Entity.Create(
+            ("Var1", "value1"),
+            ("Var2", 2),
+            ("Var3", 3.3),
+            ("Var4", true),
+            ("Var5", Core.SCLType.Enum),
+            ("Var6", new DateTime(2020, 12, 12))
+        );
+
+        var result = await PwshRunner.RunScriptAsync(script, lf.CreateLogger("Test"), entity, null)
+            .ToListAsync();
+
+        for (var i = 0; i < entity.Dictionary.Count; i++)
+            Assert.Equal(
+                entity.Dictionary[$"Var{i + 1}"].BestValue.ObjectValue,
+                result[i].BaseObject
+            );
+    }
+
+#endregion
+
+#region EntityFromPSObject
 
     [Fact]
     public void EntityFromPSObject_WhenPSObjectIsNull_Throws()
@@ -235,6 +362,10 @@ public class PwshRunnerTests
         Assert.Equal(2,        actual![1].ObjectValue);
     }
 
+#endregion
+
+#region PSObjectFromEntity
+
     [Theory]
     [InlineData("hello")]
     [InlineData(123)]
@@ -294,6 +425,8 @@ public class PwshRunnerTests
         Assert.IsType<PSObject>(actual);
         Assert.Equal(expected, actual.Properties["list"].Value);
     }
+
+#endregion
 }
 
 }
