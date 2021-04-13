@@ -32,11 +32,10 @@ public class PwshRunner
         }
     }
 
-    public static async IAsyncEnumerable<PSObject> RunScriptAsync(
+    private static PowerShell CreateRunspace(
         string script,
         ILogger logger,
-        Entity? variables = null,
-        PSDataCollection<PSObject>? input = null)
+        Entity? variables = null)
     {
         var iss = InitialSessionState.CreateDefault();
 
@@ -49,13 +48,7 @@ public class PwshRunner
             iss.Variables.Add(vars);
         }
 
-        using var ps = PowerShell.Create(iss);
-
-        var output = new PSDataCollection<PSObject>();
-        var buffer = new BufferBlock<PSObject>();
-
-        output.DataAdded += (sender, ev) =>
-            ProcessData<PSObject>(sender, ev.Index, pso => buffer.Post(pso));
+        var ps = PowerShell.Create(iss);
 
         ps.Streams.Error.DataAdded += (sender, ev) => ProcessData<ErrorRecord>(
             sender,
@@ -71,8 +64,25 @@ public class PwshRunner
 
         ps.AddScript(script);
 
+        return ps;
+    }
+
+    public static async IAsyncEnumerable<PSObject> RunScriptAsync(
+        string script,
+        ILogger logger,
+        Entity? variables = null,
+        PSDataCollection<PSObject>? input = null)
+    {
+        using var ps = CreateRunspace(script, logger, variables);
+
+        var output = new PSDataCollection<PSObject>();
+        var buffer = new BufferBlock<PSObject>();
+
+        output.DataAdded += (sender, ev) =>
+            ProcessData<PSObject>(sender, ev.Index, pso => buffer.Post(pso));
+
         var psTask = Task.Factory.FromAsync(
-            ps.BeginInvoke<PSObject, PSObject>(input, output),
+            ps.BeginInvoke(input, output),
             end =>
             {
                 ps.EndInvoke(end);
