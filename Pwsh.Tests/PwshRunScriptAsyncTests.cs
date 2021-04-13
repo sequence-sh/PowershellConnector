@@ -9,7 +9,7 @@ using System.Collections.Generic;
 namespace Reductech.EDR.Connectors.Pwsh.Tests
 {
 
-public partial class PwshRunScriptTests : StepTestBase<PwshRunScript, Array<Entity>>
+public partial class PwshRunScriptAsyncTests : StepTestBase<PwshRunScriptAsync, Array<Entity>>
 {
     /// <inheritdoc />
     protected override IEnumerable<StepCase> StepCases
@@ -20,7 +20,8 @@ public partial class PwshRunScriptTests : StepTestBase<PwshRunScript, Array<Enti
                 "Run PowerShell script that returns a string",
                 new ForEach<Entity>()
                 {
-                    Array = new PwshRunScript { Script = Constant(@"Write-Output 'hello!'") },
+                    Array =
+                        new PwshRunScriptAsync { Script = Constant(@"Write-Output 'hello!'") },
                     Action = new Log<Entity>
                     {
                         Value = new GetVariable<Entity> { Variable = VariableName.Entity }
@@ -34,7 +35,11 @@ public partial class PwshRunScriptTests : StepTestBase<PwshRunScript, Array<Enti
                 "Run PowerShell script that returns nothing but emits a warning",
                 new ForEach<Entity>()
                 {
-                    Array = new PwshRunScript { Script = Constant(@"Write-Warning 'warning'") },
+                    Array =
+                        new PwshRunScriptAsync
+                        {
+                            Script = Constant(@"Write-Warning 'warning'")
+                        },
                     Action = new Log<Entity>
                     {
                         Value = new GetVariable<Entity> { Variable = VariableName.Entity }
@@ -48,7 +53,8 @@ public partial class PwshRunScriptTests : StepTestBase<PwshRunScript, Array<Enti
                 "Run PowerShell script that returns a stream of ints",
                 new ForEach<Entity>()
                 {
-                    Array = new PwshRunScript { Script = Constant(@"1..3 | Write-Output") },
+                    Array =
+                        new PwshRunScriptAsync { Script = Constant(@"1..3 | Write-Output") },
                     Action = new Log<Entity>
                     {
                         Value = new GetVariable<Entity> { Variable = VariableName.Entity }
@@ -64,7 +70,7 @@ public partial class PwshRunScriptTests : StepTestBase<PwshRunScript, Array<Enti
                 "Run PowerShell script that returns a PSObject",
                 new ForEach<Entity>()
                 {
-                    Array = new PwshRunScript
+                    Array = new PwshRunScriptAsync
                     {
                         Script = Constant(
                             @"[pscustomobject]@{ prop1 = 'one' ; prop2 = 2 } | Write-Output"
@@ -83,7 +89,7 @@ public partial class PwshRunScriptTests : StepTestBase<PwshRunScript, Array<Enti
                 "Run PowerShell passing a variable set to it",
                 new ForEach<Entity>()
                 {
-                    Array = new PwshRunScript
+                    Array = new PwshRunScriptAsync
                     {
                         Script = Constant(@"$var1, $var2 | Write-Output"),
                         Variables = Constant(
@@ -107,7 +113,7 @@ public partial class PwshRunScriptTests : StepTestBase<PwshRunScript, Array<Enti
                 "Run PowerShell with an Input",
                 new ForEach<Entity>
                 {
-                    Array = new PwshRunScript
+                    Array = new PwshRunScriptAsync
                     {
                         Script = Constant(@"$Input | ForEach-Object { Write-Output $_ }"),
                         Input = Array(
@@ -136,7 +142,7 @@ public partial class PwshRunScriptTests : StepTestBase<PwshRunScript, Array<Enti
                 "Run script that returns two PSObjects and print results",
                 @"
 - ForEach
-    Array: (PwshRunScript Script: ""@( [pscustomobject]@{ prop1 = 'one'; prop2 = 2 }, [pscustomobject]@{ prop1 = 'three'; prop2 = 4 }) | Write-Output"")
+    Array: (PwshRunScriptAsync Script: ""@( [pscustomobject]@{ prop1 = 'one'; prop2 = 2 }, [pscustomobject]@{ prop1 = 'three'; prop2 = 4 }) | Write-Output"")
     Action: (Log (GetVariable <entity>))",
                 Unit.Default,
                 "(prop1: \"one\" prop2: 2)",
@@ -151,7 +157,7 @@ public partial class PwshRunScriptTests : StepTestBase<PwshRunScript, Array<Enti
     (prop1: ""value3"" prop2: 4)
   ]
 - ForEach
-    Array: (PwshRunScript
+    Array: (PwshRunScriptAsync
         Script: ""$input | ForEach-Object { Write-Output $_ }""
         Input: <Input>
     )
