@@ -1,10 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using Reductech.EDR.Core.Internal;
 using Reductech.EDR.Core.Internal.Errors;
+using Reductech.EDR.Core.Util;
 
 namespace Reductech.EDR.Connectors.Pwsh
 {
@@ -13,23 +13,22 @@ using Reductech.EDR.Core;
 using Reductech.EDR.Core.Attributes;
 
 /// <summary>
-/// Executes a powershell script and returns any results written to the pipeline
-/// as an array of entities.
+/// Executes a powershell script.
 /// </summary>
 [Alias("PwshRun")]
 [Alias("PowerShellRun")]
 [Alias("PowerShellRunScript")]
-public sealed class PwshRunScript : CompoundStep<Array<Entity>>
+public sealed class PwshRunScript : CompoundStep<Unit>
 {
     /// <inheritdoc />
-    protected override async Task<Result<Array<Entity>, IError>> Run(
+    protected override async Task<Result<Unit, IError>> Run(
         IStateMonad stateMonad,
         CancellationToken cancellationToken)
     {
         var script = await Script.Run(stateMonad, cancellationToken).Map(x => x.GetStringAsync());
 
         if (script.IsFailure)
-            return script.ConvertFailure<Array<Entity>>();
+            return script.ConvertFailure<Unit>();
 
         Entity? vars = null;
 
@@ -38,20 +37,14 @@ public sealed class PwshRunScript : CompoundStep<Array<Entity>>
             var variables = await Variables.Run(stateMonad, cancellationToken);
 
             if (variables.IsFailure)
-                return variables.ConvertFailure<Array<Entity>>();
+                return variables.ConvertFailure<Unit>();
 
             vars = variables.Value;
         }
 
-        var result = await PwshRunner.RunScript(script.Value, stateMonad.Logger, vars);
+        await PwshRunner.RunScript(script.Value, stateMonad.Logger, vars);
 
-        var elements = await result.Select(PwshRunner.EntityFromPSObject)
-            .ToSCLArray()
-            .GetElementsAsync(cancellationToken);
-
-        return elements.IsFailure
-            ? elements.ConvertFailure<Array<Entity>>()
-            : elements.Value.ToSCLArray();
+        return Unit.Default;
     }
 
     /// <summary>
@@ -72,7 +65,7 @@ public sealed class PwshRunScript : CompoundStep<Array<Entity>>
 
     /// <inheritdoc />
     public override IStepFactory StepFactory { get; } =
-        new SimpleStepFactory<PwshRunScript, Array<Entity>>();
+        new SimpleStepFactory<PwshRunScript, Unit>();
 }
 
 }
