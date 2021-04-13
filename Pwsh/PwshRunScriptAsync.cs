@@ -16,6 +16,7 @@ using Reductech.EDR.Core.Attributes;
 /// <summary>
 /// Executes a powershell script and returns any results written to the pipeline
 /// as an entity stream.
+/// Running a script asynchronously allows for input streaming.
 /// Note that the script only runs when the output of this Step is read.
 /// </summary>
 [Alias("PwshRunAsync")]
@@ -87,6 +88,7 @@ public sealed class PwshRunScriptAsync : CompoundStep<Array<Entity>>
     [StepProperty(order: 2)]
     [DefaultValueExplanation("No variables passed to the script")]
     [Alias("SetVariables")]
+    [Alias("WithVariables")]
     public IStep<Entity>? Variables { get; set; } = null;
 
     /// <summary>
