@@ -67,6 +67,19 @@ public class PwshRunner
         return ps;
     }
 
+    public static async Task<List<PSObject>> RunScript(
+        string script,
+        ILogger logger,
+        Entity? variables = null,
+        PSDataCollection<PSObject>? input = null)
+    {
+        using var ps = CreateRunspace(script, logger, variables);
+
+        var result = await (input == null ? ps.InvokeAsync() : ps.InvokeAsync(input));
+
+        return result.ToList();
+    }
+
     public static async IAsyncEnumerable<PSObject> RunScriptAsync(
         string script,
         ILogger logger,
