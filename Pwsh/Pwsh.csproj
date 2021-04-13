@@ -6,7 +6,7 @@
     <RootNamespace>Reductech.EDR.Connectors.Pwsh</RootNamespace>
     <AssemblyName>Reductech.EDR.Connectors.Pwsh</AssemblyName>
     <Nullable>enable</Nullable>
-    <Version>0.8.0$(VersionSuffix)</Version>
+    <Version>0.8.1$(VersionSuffix)</Version>
   </PropertyGroup>
 
   <PropertyGroup>
