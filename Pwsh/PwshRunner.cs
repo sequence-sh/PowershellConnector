@@ -32,7 +32,7 @@ public class PwshRunner
         }
     }
 
-    public static async IAsyncEnumerable<PSObject> RunScript(
+    public static async IAsyncEnumerable<PSObject> RunScriptAsync(
         string script,
         ILogger logger,
         Entity? variables = null,
@@ -92,7 +92,7 @@ public class PwshRunner
         Entity? variables = null,
         PSDataCollection<PSObject>? input = null)
     {
-        await foreach (var pso in RunScript(script, logger, variables, input))
+        await foreach (var pso in RunScriptAsync(script, logger, variables, input))
             yield return EntityFromPSObject(pso);
     }
 

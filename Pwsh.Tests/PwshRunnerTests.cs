@@ -65,7 +65,7 @@ public class PwshRunnerTests
         var logger = TestLoggerFactory.Create().CreateLogger("Test");
         var script = @"Write-Output 'one'; Write-Output 2";
 
-        var result = await PwshRunner.RunScript(script, logger).ToListAsync();
+        var result = await PwshRunner.RunScriptAsync(script, logger).ToListAsync();
 
         Assert.Equal(new List<PSObject> { "one", 2 }, result);
     }
@@ -79,7 +79,7 @@ public class PwshRunnerTests
         var script =
             @"Write-Output 'one'; Write-Error 'error'; Write-Output 'two'; Write-Warning 'warning'";
 
-        _ = await PwshRunner.RunScript(script, lf.CreateLogger("Test")).ToListAsync();
+        _ = await PwshRunner.RunScriptAsync(script, lf.CreateLogger("Test")).ToListAsync();
 
         Assert.Equal(2, lf.Sink.LogEntries.Count());
         Assert.Contains(lf.Sink.LogEntries, o => o.Message != null && o.Message.Equals("error"));
@@ -109,7 +109,7 @@ public class PwshRunnerTests
             }
         );
 
-        var result = await PwshRunner.RunScript(script, lf.CreateLogger("Test"), null, input)
+        var result = await PwshRunner.RunScriptAsync(script, lf.CreateLogger("Test"), null, input)
             .ToListAsync();
 
         var actual = result.Select(o => (int)o.BaseObject).ToArray();
@@ -134,7 +134,7 @@ public class PwshRunnerTests
             ("Var6", new DateTime(2020, 12, 12))
         );
 
-        var result = await PwshRunner.RunScript(script, lf.CreateLogger("Test"), entity, null)
+        var result = await PwshRunner.RunScriptAsync(script, lf.CreateLogger("Test"), entity, null)
             .ToListAsync();
 
         for (var i = 0; i < entity.Dictionary.Count; i++)
