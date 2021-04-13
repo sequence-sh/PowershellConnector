@@ -78,18 +78,19 @@ public class PwshRunnerTests
 
     [Fact]
     [Trait("Category", "Integration")]
-    public async void RunScript_LogsErrorsAndWarnings()
+    public async void RunScript_LogsErrorsWarningsAndInformation()
     {
         var lf = TestLoggerFactory.Create();
 
         var script =
-            @"Write-Output 'one'; Write-Error 'error'; Write-Output 'two'; Write-Warning 'warning'";
+            @"Write-Output 'one'; Write-Error 'error'; Write-Output 'two'; Write-Warning 'warning'; Write-Information 'info'";
 
         _ = await PwshRunner.RunScript(script, lf.CreateLogger("Test"));
 
-        Assert.Equal(2, lf.Sink.LogEntries.Count());
+        Assert.Equal(3, lf.Sink.LogEntries.Count());
         Assert.Contains(lf.Sink.LogEntries, o => o.Message != null && o.Message.Equals("error"));
         Assert.Contains(lf.Sink.LogEntries, o => o.Message != null && o.Message.Equals("warning"));
+        Assert.Contains(lf.Sink.LogEntries, o => o.Message != null && o.Message.Equals("info"));
     }
 
     [Fact]
@@ -166,18 +167,19 @@ public class PwshRunnerTests
 
     [Fact]
     [Trait("Category", "Integration")]
-    public async void RunScriptAsync_LogsErrorsAndWarnings()
+    public async void RunScriptAsync_LogsErrorsWarningsAndInformation()
     {
         var lf = TestLoggerFactory.Create();
 
         var script =
-            @"Write-Output 'one'; Write-Error 'error'; Write-Output 'two'; Write-Warning 'warning'";
+            @"Write-Output 'one'; Write-Error 'error'; Write-Output 'two'; Write-Warning 'warning'; Write-Information 'info'";
 
         _ = await PwshRunner.RunScriptAsync(script, lf.CreateLogger("Test")).ToListAsync();
 
-        Assert.Equal(2, lf.Sink.LogEntries.Count());
+        Assert.Equal(3, lf.Sink.LogEntries.Count());
         Assert.Contains(lf.Sink.LogEntries, o => o.Message != null && o.Message.Equals("error"));
         Assert.Contains(lf.Sink.LogEntries, o => o.Message != null && o.Message.Equals("warning"));
+        Assert.Contains(lf.Sink.LogEntries, o => o.Message != null && o.Message.Equals("info"));
     }
 
     [Fact]

@@ -50,6 +50,12 @@ public class PwshRunner
 
         var ps = PowerShell.Create(iss);
 
+        ps.Streams.Information.DataAdded += (sender, ev) => ProcessData<InformationRecord>(
+            sender,
+            ev.Index,
+            pso => logger.LogInformation(pso.MessageData.ToString())
+        );
+
         ps.Streams.Error.DataAdded += (sender, ev) => ProcessData<ErrorRecord>(
             sender,
             ev.Index,
