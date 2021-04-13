@@ -43,7 +43,7 @@ public class PwshRunner
         if (variables != null)
         {
             var vars = variables.Select(
-                v => new SessionStateVariableEntry(v.Name, v.BestValue, string.Empty)
+                v => new SessionStateVariableEntry(v.Name, v.BestValue.ObjectValue, string.Empty)
             );
 
             iss.Variables.Add(vars);
