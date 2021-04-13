@@ -118,6 +118,33 @@ public class PwshRunnerTests
     }
 
     [Fact]
+    [Trait("Category", "Integration")]
+    public async void RunScript_CorrectlyPassesVariablesToScript()
+    {
+        var lf = TestLoggerFactory.Create();
+
+        var script = @"1..6 | % { Write-Output (Get-Variable -Name ""Var$_"").Value }";
+
+        var entity = Entity.Create(
+            ("Var1", "value1"),
+            ("Var2", 2),
+            ("Var3", 3.3),
+            ("Var4", true),
+            ("Var5", Core.SCLType.Enum),
+            ("Var6", new DateTime(2020, 12, 12))
+        );
+
+        var result = await PwshRunner.RunScript(script, lf.CreateLogger("Test"), entity, null)
+            .ToListAsync();
+
+        for (var i = 0; i < entity.Dictionary.Count; i++)
+            Assert.Equal(
+                entity.Dictionary[$"Var{i + 1}"].BestValue.ObjectValue,
+                result[i].BaseObject
+            );
+    }
+
+    [Fact]
     public void EntityFromPSObject_WhenPSObjectIsNull_Throws()
     {
         var err = Assert.Throws<NullReferenceException>(() => PwshRunner.EntityFromPSObject(null!));
