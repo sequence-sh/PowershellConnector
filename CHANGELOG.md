@@ -1,3 +1,19 @@
+# v0.8.1 (2021-04-13)
+
+## Summary of Changes
+
+### Connector Updates
+
+- Renamed `RunScript` to `RunScriptAsync`
+- Added a new `RunScript` step to enable executing scripts synchronously
+
+## Issues Closed in this Release
+
+### Bug Fixes
+
+- Variable values passed to scripts are not serialized correctly #14
+- Script does not execute unless the output is read #12
+
 # v0.8.0 (2021-04-08)
 
 - Update of Core dependencies only
