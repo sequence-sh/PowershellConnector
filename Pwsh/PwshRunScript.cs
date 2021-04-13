@@ -1,11 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Management.Automation;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using Reductech.EDR.Core.Internal;
 using Reductech.EDR.Core.Internal.Errors;
-using Reductech.EDR.Core.Util;
 
 namespace Reductech.EDR.Connectors.Pwsh
 {
@@ -15,7 +14,7 @@ using Reductech.EDR.Core.Attributes;
 
 /// <summary>
 /// Executes a powershell script and returns any results written to the pipeline
-/// as an entity stream.
+/// as an array of entities.
 /// </summary>
 [Alias("PwshRun")]
 [Alias("PowerShellRun")]
@@ -44,75 +43,36 @@ public sealed class PwshRunScript : CompoundStep<Array<Entity>>
             vars = variables.Value;
         }
 
-        PSDataCollection<PSObject>? input = null;
+        var result = await PwshRunner.RunScript(script.Value, stateMonad.Logger, vars);
 
-        #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-        async ValueTask<Result<Unit, IError>> AddObject(Entity x, CancellationToken ct)
-        {
-            input.Add(PwshRunner.PSObjectFromEntity(x));
-            return Unit.Default;
-        }
-        #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+        var elements = await result.Select(PwshRunner.EntityFromPSObject)
+            .ToSCLArray()
+            .GetElementsAsync(cancellationToken);
 
-        if (Input != null)
-        {
-            var inputStream = await Input.Run(stateMonad, cancellationToken);
-
-            if (inputStream.IsFailure)
-                return inputStream.ConvertFailure<Array<Entity>>();
-
-            input = new PSDataCollection<PSObject>();
-
-            _ = inputStream.Value.ForEach(AddObject, cancellationToken)
-                .ContinueWith(_ => input.Complete(), cancellationToken);
-        }
-
-        var stream = PwshRunner.GetEntityEnumerable(script.Value, stateMonad.Logger, vars, input)
-            .ToSCLArray();
-
-        return stream;
+        return elements.IsFailure
+            ? elements.ConvertFailure<Array<Entity>>()
+            : elements.Value.ToSCLArray();
     }
 
     /// <summary>
     /// The script to run
     /// </summary>
-    [StepProperty(order: 1)]
+    [StepProperty(1)]
     [Required]
     public IStep<StringStream> Script { get; set; } = null!;
 
     /// <summary>
     /// List of input variables and corresponding values.
     /// </summary>
-    [StepProperty(order: 2)]
+    [StepProperty(2)]
     [DefaultValueExplanation("No variables passed to the script")]
     [Alias("SetVariables")]
+    [Alias("WithVariables")]
     public IStep<Entity>? Variables { get; set; } = null;
 
-    /// <summary>
-    /// Input stream, used to pipeline data to the Script.
-    /// This stream is exposed via the automatic variable $input.
-    /// </summary>
-    [StepProperty(order: 3)]
-    [DefaultValueExplanation("No input stream")]
-    [Alias("InputStream")]
-    public IStep<Array<Entity>>? Input { get; set; } = null;
-
     /// <inheritdoc />
-    public override IStepFactory StepFactory => PwshRunScriptStepFactory.Instance;
-}
-
-/// <summary>
-/// Executes a powershell script
-/// </summary>
-public sealed class PwshRunScriptStepFactory : SimpleStepFactory<PwshRunScript, Array<Entity>>
-{
-    private PwshRunScriptStepFactory() { }
-
-    /// <summary>
-    /// The instance.
-    /// </summary>
-    public static SimpleStepFactory<PwshRunScript, Array<Entity>> Instance { get; } =
-        new PwshRunScriptStepFactory();
+    public override IStepFactory StepFactory { get; } =
+        new SimpleStepFactory<PwshRunScript, Array<Entity>>();
 }
 
 }
