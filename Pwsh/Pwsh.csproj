@@ -28,9 +28,23 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.1.3" />
-    <PackageReference Include="Reductech.EDR.Core" Version="0.9.0-a.master.2104231243">
+    <PackageReference Include="Reductech.EDR.Core" Version="0.9.0-a.master.2105121639">
         <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
   </ItemGroup>
+
+  <PropertyGroup Condition="$(PackConnector) != ''">
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <Target Name="AddConnectorDependencies"
+          BeforeTargets="GenerateNuspec"
+          Condition="$(PackConnector) != ''">
+    <ItemGroup>
+      <_PackageFiles
+        Include="@(RuntimeCopyLocalItems)"
+        PackagePath="$(BuildOutputTargetFolder)/$(TargetFramework)/%(Filename)%(Extension)" />
+    </ItemGroup>
+  </Target>
 
 </Project>
