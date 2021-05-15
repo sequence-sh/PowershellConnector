@@ -13,6 +13,9 @@ using Reductech.EDR.Core.Entities;
 namespace Reductech.EDR.Connectors.Pwsh
 {
 
+/// <summary>
+/// Collection of methods to run powershell scripts
+/// </summary>
 public class PwshRunner
 {
     internal static void ProcessData<T>(object? sender, int index, Action<T> action)
@@ -73,6 +76,9 @@ public class PwshRunner
         return ps;
     }
 
+    /// <summary>
+    /// Run a powershell script
+    /// </summary>
     public static async Task<List<PSObject>> RunScript(
         string script,
         ILogger logger,
@@ -86,6 +92,9 @@ public class PwshRunner
         return result.ToList();
     }
 
+    /// <summary>
+    /// Run a powershell script
+    /// </summary>
     public static async IAsyncEnumerable<PSObject> RunScriptAsync(
         string script,
         ILogger logger,
@@ -115,6 +124,9 @@ public class PwshRunner
         await psTask;
     }
 
+    /// <summary>
+    /// Run a script and return the result as an async Enumerable.
+    /// </summary>
     public static async IAsyncEnumerable<Entity> GetEntityEnumerable(
         string script,
         ILogger logger,
@@ -125,6 +137,9 @@ public class PwshRunner
             yield return EntityFromPSObject(pso);
     }
 
+    /// <summary>
+    /// Convert a PSObject to an Entity
+    /// </summary>
     public static Entity EntityFromPSObject(PSObject pso)
     {
         Entity? entity;
@@ -159,6 +174,9 @@ public class PwshRunner
         return entity;
     }
 
+    /// <summary>
+    /// Convert an Entity to a PSObject
+    /// </summary>
     public static PSObject PSObjectFromEntity(Entity entity)
     {
         var single = entity.TryGetValue(Entity.PrimitiveKey);
