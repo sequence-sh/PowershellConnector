@@ -12,6 +12,10 @@
 
 - Allow this package to be used as a plugin #16
 
+### Bug Fixes
+
+- Connector package is missing dependencies #20
+
 ### Maintenance
 
 - Enable publish to connector registry #18
