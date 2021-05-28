@@ -1,3 +1,13 @@
+# v0.9.1 (2021-05-28)
+
+Connector package is no longer runtime dependent.
+
+## Issues Closed in this Release
+
+### New Features
+
+- Update connector packaging method to remove runtime dependency #21
+
 # v0.9.0 (2021-05-14)
 
 ## Summary of Changes
