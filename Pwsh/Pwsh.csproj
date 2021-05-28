@@ -2,14 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <RuntimeIdentifier>win10-x64</RuntimeIdentifier>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <RootNamespace>Reductech.EDR.Connectors.Pwsh</RootNamespace>
     <AssemblyName>Reductech.EDR.Connectors.Pwsh</AssemblyName>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <Nullable>enable</Nullable>
-    <Version>0.9.0$(VersionSuffix)</Version>
+    <Version>0.9.1$(VersionSuffix)</Version>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -38,13 +37,28 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup Condition="$(PackConnector) != ''">
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\LICENSE" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
   <PropertyGroup Condition="$(PackConnector) != ''">
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageLicenseExpression></PackageLicenseExpression>
   </PropertyGroup>
 
   <Target Name="AddConnectorDependencies" BeforeTargets="GenerateNuspec" Condition="$(PackConnector) != ''">
     <ItemGroup>
-      <_PackageFiles Include="@(RuntimeCopyLocalItems)" PackagePath="$(BuildOutputTargetFolder)/$(TargetFramework)/%(Filename)%(Extension)" />
+      <_PackageFiles Include="@(RuntimeCopyLocalItems)"
+                     PackageFlatten="false"
+                     PackagePath="$(BuildOutputTargetFolder)/$(TargetFramework)/%(RecursiveDir)%(Filename)%(Extension)" />
+      <_PackageFiles Include="@(RuntimeTargetsCopyLocalItems)"
+                     PackageFlatten="false"
+                     PackagePath="$(BuildOutputTargetFolder)/$(TargetFramework)/$([System.Text.RegularExpressions.Regex]::Match(%(RuntimeTargetsCopyLocalItems.Identity), '.+(runtimes(\\|/).*)$').Groups[1].Value)" />
+      <_PackageFiles Include="$(OutputPath)$(AssemblyName).deps.json"
+                     PackagePath="$(BuildOutputTargetFolder)/$(TargetFramework)/$(AssemblyName).deps.json" />
     </ItemGroup>
   </Target>
 
