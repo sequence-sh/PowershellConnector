@@ -8,7 +8,7 @@
     <AssemblyName>Reductech.EDR.Connectors.Pwsh</AssemblyName>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <Nullable>enable</Nullable>
-    <Version>0.9.1$(VersionSuffix)</Version>
+    <Version>0.10.0$(VersionSuffix)</Version>
   </PropertyGroup>
 
   <PropertyGroup>

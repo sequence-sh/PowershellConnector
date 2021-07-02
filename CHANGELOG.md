@@ -1,3 +1,11 @@
+# v0.10.0 (2021-07-02)
+
+## Issues Closed in this Release
+
+### Maintenance
+
+- Update Core to latest and remove SCLSettings #22
+
 # v0.9.1 (2021-05-28)
 
 Connector package is no longer runtime dependent.
