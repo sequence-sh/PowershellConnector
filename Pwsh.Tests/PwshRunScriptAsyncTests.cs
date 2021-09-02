@@ -22,13 +22,13 @@ public partial class PwshRunScriptAsyncTests : StepTestBase<PwshRunScriptAsync, 
                 {
                     Array =
                         new PwshRunScriptAsync { Script = Constant(@"Write-Output 'hello!'") },
-                    Action = new Log<Entity>
-                    {
-                        Value = new GetVariable<Entity> { Variable = VariableName.Entity }
-                    }
+                    Action = new LambdaFunction<Entity, Unit>(
+                        null,
+                        new Log<Entity>() { Value = GetEntityVariable }
+                    )
                 },
                 Unit.Default,
-                $"({Entity.PrimitiveKey}: \"hello!\")"
+                $"('{Entity.PrimitiveKey}': \"hello!\")"
             );
 
             yield return new StepCase(
@@ -36,14 +36,11 @@ public partial class PwshRunScriptAsyncTests : StepTestBase<PwshRunScriptAsync, 
                 new ForEach<Entity>()
                 {
                     Array =
-                        new PwshRunScriptAsync
-                        {
-                            Script = Constant(@"Write-Warning 'warning'")
-                        },
-                    Action = new Log<Entity>
-                    {
-                        Value = new GetVariable<Entity> { Variable = VariableName.Entity }
-                    }
+                        new PwshRunScriptAsync { Script = Constant(@"Write-Warning 'warning'") },
+                    Action = new LambdaFunction<Entity, Unit>(
+                        null,
+                        new Log<Entity>() { Value = GetEntityVariable }
+                    )
                 },
                 Unit.Default,
                 "warning"
@@ -55,15 +52,15 @@ public partial class PwshRunScriptAsyncTests : StepTestBase<PwshRunScriptAsync, 
                 {
                     Array =
                         new PwshRunScriptAsync { Script = Constant(@"1..3 | Write-Output") },
-                    Action = new Log<Entity>
-                    {
-                        Value = new GetVariable<Entity> { Variable = VariableName.Entity }
-                    }
+                    Action = new LambdaFunction<Entity, Unit>(
+                        null,
+                        new Log<Entity>() { Value = GetEntityVariable }
+                    )
                 },
                 Unit.Default,
-                $"({Entity.PrimitiveKey}: 1)",
-                $"({Entity.PrimitiveKey}: 2)",
-                $"({Entity.PrimitiveKey}: 3)"
+                $"('{Entity.PrimitiveKey}': 1)",
+                $"('{Entity.PrimitiveKey}': 2)",
+                $"('{Entity.PrimitiveKey}': 3)"
             );
 
             yield return new StepCase(
@@ -76,13 +73,13 @@ public partial class PwshRunScriptAsyncTests : StepTestBase<PwshRunScriptAsync, 
                             @"[pscustomobject]@{ prop1 = 'one' ; prop2 = 2 } | Write-Output"
                         )
                     },
-                    Action = new Log<Entity>
-                    {
-                        Value = new GetVariable<Entity> { Variable = VariableName.Entity }
-                    }
+                    Action = new LambdaFunction<Entity, Unit>(
+                        null,
+                        new Log<Entity>() { Value = GetEntityVariable }
+                    )
                 },
                 Unit.Default,
-                "(prop1: \"one\" prop2: 2)"
+                "('prop1': \"one\" 'prop2': 2)"
             );
 
             yield return new StepCase(
@@ -99,14 +96,14 @@ public partial class PwshRunScriptAsyncTests : StepTestBase<PwshRunScriptAsync, 
                             )
                         )
                     },
-                    Action = new Log<Entity>
-                    {
-                        Value = new GetVariable<Entity> { Variable = VariableName.Entity }
-                    }
+                    Action = new LambdaFunction<Entity, Unit>(
+                        null,
+                        new Log<Entity>() { Value = GetEntityVariable }
+                    )
                 },
                 Unit.Default,
-                "(value: \"ABC\")",
-                "(value: \"DEF\")"
+                "('value': \"ABC\")",
+                "('value': \"DEF\")"
             );
 
             yield return new StepCase(
@@ -121,14 +118,14 @@ public partial class PwshRunScriptAsyncTests : StepTestBase<PwshRunScriptAsync, 
                             Entity.Create(("key3", 3), ("key4", new[] { "four", "forty" }))
                         )
                     },
-                    Action = new Log<Entity>
-                    {
-                        Value = new GetVariable<Entity> { Variable = VariableName.Entity }
-                    }
+                    Action = new LambdaFunction<Entity, Unit>(
+                        null,
+                        new Log<Entity>() { Value = GetEntityVariable }
+                    )
                 },
                 Unit.Default,
-                "(key1: 1 key2: \"two\")",
-                "(key3: 3 key4: [\"four\", \"forty\"])"
+                "('key1': 1 'key2': \"two\")",
+                "('key3': 3 'key4': [\"four\", \"forty\"])"
             );
         }
     }
@@ -143,10 +140,10 @@ public partial class PwshRunScriptAsyncTests : StepTestBase<PwshRunScriptAsync, 
                 @"
 - ForEach
     Array: (PwshRunScriptAsync Script: ""@( [pscustomobject]@{ prop1 = 'one'; prop2 = 2 }, [pscustomobject]@{ prop1 = 'three'; prop2 = 4 }) | Write-Output"")
-    Action: (Log (GetVariable <entity>))",
+    Action: (Log <>)",
                 Unit.Default,
-                "(prop1: \"one\" prop2: 2)",
-                "(prop1: \"three\" prop2: 4)"
+                "('prop1': \"one\" 'prop2': 2)",
+                "('prop1': \"three\" 'prop2': 4)"
             );
 
             yield return new DeserializeCase(
@@ -161,10 +158,10 @@ public partial class PwshRunScriptAsyncTests : StepTestBase<PwshRunScriptAsync, 
         Script: ""$input | ForEach-Object { Write-Output $_ }""
         Input: <Input>
     )
-    Action: (Log (GetVariable <entity>))",
+    Action: (Log <>)",
                 Unit.Default,
-                "(prop1: \"value1\" prop2: 2)",
-                "(prop1: \"value3\" prop2: 4)"
+                "('prop1': \"value1\" 'prop2': 2)",
+                "('prop1': \"value3\" 'prop2': 4)"
             ) { IgnoreFinalState = true };
         }
     }
