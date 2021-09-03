@@ -8,7 +8,7 @@
     <AssemblyName>Reductech.EDR.Connectors.Pwsh</AssemblyName>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <Nullable>enable</Nullable>
-    <Version>0.10.0$(VersionSuffix)</Version>
+    <Version>0.11.0$(VersionSuffix)</Version>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -32,7 +32,7 @@
     <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.1.4">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Reductech.EDR.Core" Version="0.11.0-a.master.2109021540">
+    <PackageReference Include="Reductech.EDR.Core" Version="0.11.0">
       <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
   </ItemGroup>
@@ -40,6 +40,7 @@
   <ItemGroup Condition="$(PackConnector) != ''">
     <None Include="..\README.md" Pack="true" PackagePath="\" />
     <None Include="..\LICENSE" Pack="true" PackagePath="\" />
+    <None Include="..\NOTICE" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <PropertyGroup Condition="$(PackConnector) != ''">
