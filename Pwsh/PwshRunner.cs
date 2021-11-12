@@ -45,7 +45,7 @@ public class PwshRunner
         if (variables != null)
         {
             var vars = variables.Select(
-                v => new SessionStateVariableEntry(v.Name, v.BestValue.ObjectValue, string.Empty)
+                v => new SessionStateVariableEntry(v.Name, v.Value.ObjectValue, string.Empty)
             );
 
             iss.Variables.Add(vars);
@@ -195,7 +195,7 @@ public class PwshRunner
         };
 
         foreach (var e in entity)
-            pso.Properties.Add(new PSNoteProperty(e.Name, GetValue(e.BestValue)));
+            pso.Properties.Add(new PSNoteProperty(e.Name, GetValue(e.Value)));
 
         return pso;
     }
