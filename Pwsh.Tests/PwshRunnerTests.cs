@@ -144,7 +144,7 @@ public class PwshRunnerTests
 
         for (var i = 0; i < entity.Dictionary.Count; i++)
             Assert.Equal(
-                entity.Dictionary[$"Var{i + 1}"].BestValue.ObjectValue,
+                entity.Dictionary[$"Var{i + 1}"].Value.ObjectValue,
                 result[i].BaseObject
             );
     }
@@ -235,7 +235,7 @@ public class PwshRunnerTests
 
         for (var i = 0; i < entity.Dictionary.Count; i++)
             Assert.Equal(
-                entity.Dictionary[$"Var{i + 1}"].BestValue.ObjectValue,
+                entity.Dictionary[$"Var{i + 1}"].Value.ObjectValue,
                 result[i].BaseObject
             );
     }
@@ -336,7 +336,7 @@ public class PwshRunnerTests
         Assert.NotNull(entity);
 
         var actual =
-            entity.Dictionary[Entity.PrimitiveKey].BestValue.ObjectValue as
+            entity.Dictionary[Entity.PrimitiveKey].Value.ObjectValue as
                 ImmutableList<EntityValue>;
 
         Assert.Equal(arr[0], actual![0].ObjectValue);
@@ -355,7 +355,7 @@ public class PwshRunnerTests
 
         Assert.Single(result);
 
-        var actual = result[0].Dictionary[Entity.PrimitiveKey].BestValue.ObjectValue as
+        var actual = result[0].Dictionary[Entity.PrimitiveKey].Value.ObjectValue as
             ImmutableList<EntityValue>;
 
         Assert.Equal("value1", actual![0].ObjectValue);
@@ -398,7 +398,7 @@ public class PwshRunnerTests
         Assert.IsType<PSObject>(actual);
 
         foreach (var prop in entity)
-            Assert.Equal(prop.BestValue.ObjectValue, actual.Properties[prop.Name].Value);
+            Assert.Equal(prop.Value.ObjectValue, actual.Properties[prop.Name].Value);
     }
 
     [Fact]
