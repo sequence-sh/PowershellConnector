@@ -32,7 +32,7 @@
     <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.1.4">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Reductech.EDR.Core" Version="0.13.0-a.main.2112011736">
+    <PackageReference Include="Reductech.EDR.Core" Version="0.13.0-a.main.2112040510">
       <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
   </ItemGroup>
