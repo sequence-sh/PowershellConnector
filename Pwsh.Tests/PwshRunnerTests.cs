@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Management.Automation;
@@ -13,8 +11,7 @@ using Reductech.EDR.Core.Entities;
 using Xunit;
 using Entity = Reductech.EDR.Core.Entity;
 
-namespace Reductech.EDR.Connectors.Pwsh.Tests
-{
+namespace Reductech.EDR.Connectors.Pwsh.Tests;
 
 public class PwshRunnerTests
 {
@@ -427,6 +424,4 @@ public class PwshRunnerTests
     }
 
 #endregion
-}
-
 }

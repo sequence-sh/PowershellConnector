@@ -1,11 +1,4 @@
-﻿using Reductech.EDR.Core;
-using Reductech.EDR.Core.TestHarness;
-using static Reductech.EDR.Core.TestHarness.StaticHelpers;
-using Reductech.EDR.Core.Util;
-using System.Collections.Generic;
-
-namespace Reductech.EDR.Connectors.Pwsh.Tests
-{
+﻿namespace Reductech.EDR.Connectors.Pwsh.Tests;
 
 public partial class PwshRunScriptTests : StepTestBase<PwshRunScript, Unit>
 {
@@ -56,6 +49,4 @@ public partial class PwshRunScriptTests : StepTestBase<PwshRunScript, Unit>
             );
         }
     }
-}
-
 }

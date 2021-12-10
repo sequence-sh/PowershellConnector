@@ -1,13 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Threading;
-using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
-using Reductech.EDR.Core.Internal;
-using Reductech.EDR.Core.Internal.Errors;
-using Reductech.EDR.Core.Util;
+﻿using Reductech.EDR.Core.Internal.Errors;
 
-namespace Reductech.EDR.Connectors.Pwsh
-{
+namespace Reductech.EDR.Connectors.Pwsh;
 
 using Reductech.EDR.Core;
 using Reductech.EDR.Core.Attributes;
@@ -66,6 +59,4 @@ public sealed class PwshRunScript : CompoundStep<Unit>
     /// <inheritdoc />
     public override IStepFactory StepFactory { get; } =
         new SimpleStepFactory<PwshRunScript, Unit>();
-}
-
 }

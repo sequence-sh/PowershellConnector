@@ -1,13 +1,6 @@
-﻿using Reductech.EDR.Core;
-using Reductech.EDR.Core.Internal;
-using Reductech.EDR.Core.Steps;
-using Reductech.EDR.Core.TestHarness;
-using static Reductech.EDR.Core.TestHarness.StaticHelpers;
-using Reductech.EDR.Core.Util;
-using System.Collections.Generic;
+﻿using Reductech.EDR.Core.Steps;
 
-namespace Reductech.EDR.Connectors.Pwsh.Tests
-{
+namespace Reductech.EDR.Connectors.Pwsh.Tests;
 
 public partial class PwshRunScriptAsyncTests : StepTestBase<PwshRunScriptAsync, Array<Entity>>
 {
@@ -165,6 +158,4 @@ public partial class PwshRunScriptAsyncTests : StepTestBase<PwshRunScriptAsync, 
             ) { IgnoreFinalState = true };
         }
     }
-}
-
 }

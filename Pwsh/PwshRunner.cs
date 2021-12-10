@@ -1,17 +1,9 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Management.Automation;
+﻿using System.Management.Automation;
 using System.Management.Automation.Runspaces;
-using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using Microsoft.Extensions.Logging;
-using Reductech.EDR.Core;
-using Reductech.EDR.Core.Entities;
 
-namespace Reductech.EDR.Connectors.Pwsh
-{
+namespace Reductech.EDR.Connectors.Pwsh;
 
 /// <summary>
 /// Collection of methods to run powershell scripts
@@ -199,6 +191,4 @@ public class PwshRunner
 
         return pso;
     }
-}
-
 }

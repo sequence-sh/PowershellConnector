@@ -1,8 +1,6 @@
 ﻿using System.Reflection;
-using Reductech.EDR.Core.TestHarness;
 
-namespace Reductech.EDR.Connectors.Pwsh.Tests
-{
+namespace Reductech.EDR.Connectors.Pwsh.Tests;
 
 public class MetaTests : MetaTestsBase
 {
@@ -11,6 +9,4 @@ public class MetaTests : MetaTestsBase
 
     /// <inheritdoc />
     public override Assembly TestAssembly { get; } = Assembly.GetAssembly(typeof(MetaTests))!;
-}
-
 }

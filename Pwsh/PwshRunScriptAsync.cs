@@ -1,17 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Management.Automation;
-using System.Threading;
-using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
-using Reductech.EDR.Core.Internal;
+﻿using System.Management.Automation;
 using Reductech.EDR.Core.Internal.Errors;
-using Reductech.EDR.Core.Util;
+using Alias = Reductech.EDR.Core.Attributes.AliasAttribute;
 
-namespace Reductech.EDR.Connectors.Pwsh
-{
-
-using Reductech.EDR.Core;
-using Reductech.EDR.Core.Attributes;
+namespace Reductech.EDR.Connectors.Pwsh;
 
 /// <summary>
 /// Executes a powershell script and returns any results written to the pipeline
@@ -103,6 +94,4 @@ public sealed class PwshRunScriptAsync : CompoundStep<Array<Entity>>
     /// <inheritdoc />
     public override IStepFactory StepFactory { get; } =
         new SimpleStepFactory<PwshRunScriptAsync, Array<Entity>>();
-}
-
 }
