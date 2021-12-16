@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Management.Automation;
 using System.Threading;
@@ -7,7 +6,7 @@ using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using MELT;
 using Moq;
-using Reductech.EDR.Core.Entities;
+using Reductech.EDR.Core.Enums;
 using Xunit;
 using Entity = Reductech.EDR.Core.Entity;
 
@@ -85,9 +84,9 @@ public class PwshRunnerTests
         _ = await PwshRunner.RunScript(script, lf.CreateLogger("Test"));
 
         Assert.Equal(3, lf.Sink.LogEntries.Count());
-        Assert.Contains(lf.Sink.LogEntries, o => o.Message != null && o.Message.Equals("error"));
-        Assert.Contains(lf.Sink.LogEntries, o => o.Message != null && o.Message.Equals("warning"));
-        Assert.Contains(lf.Sink.LogEntries, o => o.Message != null && o.Message.Equals("info"));
+        Assert.Contains(lf.Sink.LogEntries, o => o.Message is "error");
+        Assert.Contains(lf.Sink.LogEntries, o => o.Message is "warning");
+        Assert.Contains(lf.Sink.LogEntries, o => o.Message is "info");
     }
 
     [Fact]
@@ -133,7 +132,7 @@ public class PwshRunnerTests
             ("Var2", 2),
             ("Var3", 3.3),
             ("Var4", true),
-            ("Var5", Core.SCLType.Enum),
+            ("Var5", TextCase.Upper),
             ("Var6", new DateTime(2020, 12, 12))
         );
 
@@ -141,7 +140,7 @@ public class PwshRunnerTests
 
         for (var i = 0; i < entity.Dictionary.Count; i++)
             Assert.Equal(
-                entity.Dictionary[$"Var{i + 1}"].Value.ObjectValue,
+                entity.Dictionary[$"Var{i + 1}"].Value,
                 result[i].BaseObject
             );
     }
@@ -174,9 +173,9 @@ public class PwshRunnerTests
         _ = await PwshRunner.RunScriptAsync(script, lf.CreateLogger("Test")).ToListAsync();
 
         Assert.Equal(3, lf.Sink.LogEntries.Count());
-        Assert.Contains(lf.Sink.LogEntries, o => o.Message != null && o.Message.Equals("error"));
-        Assert.Contains(lf.Sink.LogEntries, o => o.Message != null && o.Message.Equals("warning"));
-        Assert.Contains(lf.Sink.LogEntries, o => o.Message != null && o.Message.Equals("info"));
+        Assert.Contains(lf.Sink.LogEntries, o => o.Message is "error");
+        Assert.Contains(lf.Sink.LogEntries, o => o.Message is "warning");
+        Assert.Contains(lf.Sink.LogEntries, o => o.Message is "info");
     }
 
     [Fact]
@@ -223,7 +222,7 @@ public class PwshRunnerTests
             ("Var2", 2),
             ("Var3", 3.3),
             ("Var4", true),
-            ("Var5", Core.SCLType.Enum),
+            ("Var5", TextCase.Upper),
             ("Var6", new DateTime(2020, 12, 12))
         );
 
@@ -232,7 +231,7 @@ public class PwshRunnerTests
 
         for (var i = 0; i < entity.Dictionary.Count; i++)
             Assert.Equal(
-                entity.Dictionary[$"Var{i + 1}"].Value.ObjectValue,
+                entity.Dictionary[$"Var{i + 1}"].Value,
                 result[i].BaseObject
             );
     }
@@ -260,8 +259,8 @@ public class PwshRunnerTests
 
         Assert.NotNull(entity);
 
-        var val1 = entity.TryGetValue("prop1").Map(x => x.GetPrimitiveString());
-        var val2 = entity.TryGetValue("prop2").Map(x => x.GetPrimitiveString());
+        var val1 = entity.TryGetValue("prop1").Map(x => x.Serialize(SerializeOptions.Primitive));
+        var val2 = entity.TryGetValue("prop2").Map(x => x.Serialize(SerializeOptions.Primitive));
 
         Assert.Equal(2,        entity.Count());
         Assert.Equal("value1", val1!.ToString());
@@ -281,9 +280,9 @@ public class PwshRunnerTests
 
         Assert.NotNull(entity);
 
-        var val = entity.TryGetValue(Entity.PrimitiveKey).Value.ObjectValue;
+        var val = entity.TryGetValue(Entity.PrimitiveKey).Value;
 
-        Assert.Equal(expected, val);
+        Assert.Equal(expected, val.ToCSharpObject());
     }
 
     [Fact]
@@ -295,12 +294,12 @@ public class PwshRunnerTests
 
         Assert.NotNull(entity);
 
-        var val1 = entity.TryGetValue("prop1").Map(x => x.GetPrimitiveString());
-        var val2 = entity.TryGetValue("prop2").Map(x => x.ObjectValue);
+        var val1 = entity.TryGetValue("prop1").Map(x => x.Serialize(SerializeOptions.Primitive));
+        var val2 = entity.TryGetValue("prop2").Map(x => x);
 
-        Assert.Equal(2,        entity.Count());
-        Assert.Equal("value1", val1);
-        Assert.Equal(2,        val2);
+        Assert.Equal(2,             entity.Count());
+        Assert.Equal("value1",      val1);
+        Assert.Equal(new SCLInt(2), val2);
     }
 
     [Fact]
@@ -315,11 +314,11 @@ public class PwshRunnerTests
 
         Assert.Single(result);
 
-        var val1 = result[0].TryGetValue("prop1").Map(x => x.GetPrimitiveString());
-        var val2 = result[0].TryGetValue("prop2").Map(x => x.ObjectValue);
+        var val1 = result[0].TryGetValue("prop1").Map(x => x.Serialize(SerializeOptions.Primitive));
+        var val2 = result[0].TryGetValue("prop2").Map(x => x);
 
-        Assert.Equal("value1", val1);
-        Assert.Equal(2,        val2);
+        Assert.Equal("value1",      val1);
+        Assert.Equal(new SCLInt(2), val2);
     }
 
     [Fact]
@@ -332,12 +331,10 @@ public class PwshRunnerTests
 
         Assert.NotNull(entity);
 
-        var actual =
-            entity.Dictionary[Entity.PrimitiveKey].Value.ObjectValue as
-                ImmutableList<EntityValue>;
+        var actual = ConvertToList(entity.Dictionary[Entity.PrimitiveKey].Value);
 
-        Assert.Equal(arr[0], actual![0].ObjectValue);
-        Assert.Equal(arr[1], actual![1].ObjectValue);
+        Assert.Equal(ISCLObject.CreateFromCSharpObject(arr[0]), actual![0]);
+        Assert.Equal(ISCLObject.CreateFromCSharpObject(arr[1]), actual![1]);
     }
 
     [Fact]
@@ -352,12 +349,14 @@ public class PwshRunnerTests
 
         Assert.Single(result);
 
-        var actual = result[0].Dictionary[Entity.PrimitiveKey].Value.ObjectValue as
-            ImmutableList<EntityValue>;
+        var actual = ConvertToList(result[0].Dictionary[Entity.PrimitiveKey].Value);
 
-        Assert.Equal("value1", actual![0].ObjectValue);
-        Assert.Equal(2,        actual![1].ObjectValue);
+        Assert.Equal(new StringStream("value1"), actual[0]);
+        Assert.Equal(2.ConvertToSCLObject(),     actual[1]);
     }
+
+    private static List<ISCLObject> ConvertToList(ISCLObject arrayObject) =>
+        ((IArray)arrayObject).ListIfEvaluated().Value;
 
 #endregion
 
@@ -386,7 +385,7 @@ public class PwshRunnerTests
             ("int", 2),
             ("double", 3.3),
             ("bool", true),
-            ("enum", Core.SCLType.Enum),
+            ("enum", TextCase.Upper),
             ("date", new DateTime(2020, 12, 12))
         );
 
@@ -395,7 +394,10 @@ public class PwshRunnerTests
         Assert.IsType<PSObject>(actual);
 
         foreach (var prop in entity)
-            Assert.Equal(prop.Value.ObjectValue, actual.Properties[prop.Name].Value);
+            Assert.Equal(
+                prop.Value.ToCSharpObject(),
+                actual.Properties[prop.Name].Value
+            );
     }
 
     [Fact]
