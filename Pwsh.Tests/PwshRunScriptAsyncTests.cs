@@ -17,7 +17,7 @@ public partial class PwshRunScriptAsyncTests : StepTestBase<PwshRunScriptAsync, 
                         new PwshRunScriptAsync { Script = Constant(@"Write-Output 'hello!'") },
                     Action = new LambdaFunction<Entity, Unit>(
                         null,
-                        new Log<Entity>() { Value = GetEntityVariable }
+                        new Log() { Value = GetEntityVariable }
                     )
                 },
                 Unit.Default,
@@ -32,7 +32,7 @@ public partial class PwshRunScriptAsyncTests : StepTestBase<PwshRunScriptAsync, 
                         new PwshRunScriptAsync { Script = Constant(@"Write-Warning 'warning'") },
                     Action = new LambdaFunction<Entity, Unit>(
                         null,
-                        new Log<Entity>() { Value = GetEntityVariable }
+                        new Log() { Value = GetEntityVariable }
                     )
                 },
                 Unit.Default,
@@ -47,7 +47,7 @@ public partial class PwshRunScriptAsyncTests : StepTestBase<PwshRunScriptAsync, 
                         new PwshRunScriptAsync { Script = Constant(@"1..3 | Write-Output") },
                     Action = new LambdaFunction<Entity, Unit>(
                         null,
-                        new Log<Entity>() { Value = GetEntityVariable }
+                        new Log() { Value = GetEntityVariable }
                     )
                 },
                 Unit.Default,
@@ -68,7 +68,7 @@ public partial class PwshRunScriptAsyncTests : StepTestBase<PwshRunScriptAsync, 
                     },
                     Action = new LambdaFunction<Entity, Unit>(
                         null,
-                        new Log<Entity>() { Value = GetEntityVariable }
+                        new Log() { Value = GetEntityVariable }
                     )
                 },
                 Unit.Default,
@@ -91,7 +91,7 @@ public partial class PwshRunScriptAsyncTests : StepTestBase<PwshRunScriptAsync, 
                     },
                     Action = new LambdaFunction<Entity, Unit>(
                         null,
-                        new Log<Entity>() { Value = GetEntityVariable }
+                        new Log() { Value = GetEntityVariable }
                     )
                 },
                 Unit.Default,
@@ -113,7 +113,7 @@ public partial class PwshRunScriptAsyncTests : StepTestBase<PwshRunScriptAsync, 
                     },
                     Action = new LambdaFunction<Entity, Unit>(
                         null,
-                        new Log<Entity>() { Value = GetEntityVariable }
+                        new Log() { Value = GetEntityVariable }
                     )
                 },
                 Unit.Default,

@@ -37,7 +37,7 @@ public class PwshRunner
         if (variables != null)
         {
             var vars = variables.Select(
-                v => new SessionStateVariableEntry(v.Name, v.Value.ObjectValue, string.Empty)
+                v => new SessionStateVariableEntry(v.Name, v.Value, string.Empty)
             );
 
             iss.Variables.Add(vars);
@@ -174,16 +174,24 @@ public class PwshRunner
         var single = entity.TryGetValue(Entity.PrimitiveKey);
 
         if (single.HasValue)
-            return new PSObject(single.Value.ObjectValue);
+            return new PSObject(GetValue(single.Value));
 
         var pso = new PSObject();
 
-        static object? GetValue(EntityValue ev) => ev switch
+        static object? GetValue(ISCLObject ev) => ev switch
         {
-            EntityValue.NestedEntity nestedEntity         => PSObjectFromEntity(nestedEntity.Value),
-            EntityValue.EnumerationValue enumerationValue => enumerationValue.Value,
-            EntityValue.NestedList list                   => list.Value.Select(GetValue).ToList(),
-            _                                             => ev.ObjectValue
+            Entity nestedEntity       => PSObjectFromEntity(nestedEntity),
+            ISCLEnum sclEnum          => sclEnum.EnumValue,
+            ISCLOneOf oneOf           => GetValue(oneOf.Value),
+            SCLBool sclBool           => sclBool.Value,
+            SCLDateTime sclDateTime   => sclDateTime.Value,
+            SCLDouble sclDouble       => sclDouble.Value,
+            SCLInt sclInt             => sclInt.Value,
+            SCLNull                   => null,
+            StringStream stringStream => stringStream.GetString(),
+            Unit                      => null,
+            IArray list               => list.ListIfEvaluated().Value.Select(GetValue).ToList(),
+            _                         => null
         };
 
         foreach (var e in entity)
