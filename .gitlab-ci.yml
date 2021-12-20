@@ -3,6 +3,6 @@ include:
     file: .gitlab-ci.linux.yml
 
 variables:
-  PACKAGE_NAME_NUGET: Reductech.EDR.Connectors.Pwsh
-  PACKAGE_NAME_DLL: Reductech.EDR.Connectors.Pwsh
+  PACKAGE_NAME_NUGET: Reductech.Sequence.Connectors.Pwsh
+  PACKAGE_NAME_DLL: Reductech.Sequence.Connectors.Pwsh
   PUBLISH_CONNECTOR: 1

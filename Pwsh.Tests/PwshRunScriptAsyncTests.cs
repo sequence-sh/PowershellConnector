@@ -1,6 +1,6 @@
-﻿using Reductech.EDR.Core.Steps;
+﻿using Reductech.Sequence.Core.Steps;
 
-namespace Reductech.EDR.Connectors.Pwsh.Tests;
+namespace Reductech.Sequence.Connectors.Pwsh.Tests;
 
 public partial class PwshRunScriptAsyncTests : StepTestBase<PwshRunScriptAsync, Array<Entity>>
 {

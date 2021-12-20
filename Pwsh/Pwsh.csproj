@@ -4,23 +4,23 @@
     <TargetFramework>net6.0</TargetFramework>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <RootNamespace>Reductech.EDR.Connectors.Pwsh</RootNamespace>
-    <AssemblyName>Reductech.EDR.Connectors.Pwsh</AssemblyName>
+    <RootNamespace>Reductech.Sequence.Connectors.Pwsh</RootNamespace>
+    <AssemblyName>Reductech.Sequence.Connectors.Pwsh</AssemblyName>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <Nullable>enable</Nullable>
     <Version>0.13.0$(VersionSuffix)</Version>
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageId>Reductech.EDR.Connectors.Pwsh</PackageId>
-    <Title>EDR PowerShell Connector</Title>
+    <PackageId>Reductech.Sequence.Connectors.Pwsh</PackageId>
+    <Title>Sequence® PowerShell Connector</Title>
     <Description>Class library for executing inline PowerShell scripts as Steps</Description>
-    <Product>EDR</Product>
-    <PackageTags>ediscovery;forensics;pwsh;powershell;automation;orchestration;edrm</PackageTags>
+    <Product>Sequence®</Product>
+    <PackageTags>ediscovery;forensics;pwsh;powershell;automation;orchestration;edrm;sequence</PackageTags>
 
-    <PackageProjectUrl>https://gitlab.com/reductech/edr/connectors/pwsh</PackageProjectUrl>
-    <RepositoryUrl>https://gitlab.com/reductech/edr/connectors/pwsh</RepositoryUrl>
-    <PackageReleaseNotes>https://gitlab.com/reductech/edr/connectors/pwsh/-/blob/master/CHANGELOG.md</PackageReleaseNotes>
+    <PackageProjectUrl>https://gitlab.com/reductech/sequence/connectors/pwsh</PackageProjectUrl>
+    <RepositoryUrl>https://gitlab.com/reductech/sequence/connectors/pwsh</RepositoryUrl>
+    <PackageReleaseNotes>https://gitlab.com/reductech/sequence/connectors/pwsh/-/blob/master/CHANGELOG.md</PackageReleaseNotes>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     
     <Authors>Reductech</Authors>
@@ -32,7 +32,7 @@
     <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.2.1">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Reductech.EDR.Core" Version="0.13.0-a.main.2112200210">
+    <PackageReference Include="Reductech.Sequence.Core" Version="0.13.0-a.main.2112201532">
       <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
   </ItemGroup>
