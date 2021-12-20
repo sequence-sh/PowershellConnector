@@ -1,4 +1,4 @@
-﻿namespace Reductech.EDR.Connectors.Pwsh.Tests;
+﻿namespace Reductech.Sequence.Connectors.Pwsh.Tests;
 
 public partial class PwshRunScriptTests : StepTestBase<PwshRunScript, Unit>
 {

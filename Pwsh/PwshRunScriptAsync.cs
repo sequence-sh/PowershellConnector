@@ -1,8 +1,8 @@
 ﻿using System.Management.Automation;
-using Reductech.EDR.Core.Internal.Errors;
-using Alias = Reductech.EDR.Core.Attributes.AliasAttribute;
+using Reductech.Sequence.Core.Internal.Errors;
+using Alias = Reductech.Sequence.Core.Attributes.AliasAttribute;
 
-namespace Reductech.EDR.Connectors.Pwsh;
+namespace Reductech.Sequence.Connectors.Pwsh;
 
 /// <summary>
 /// Executes a powershell script and returns any results written to the pipeline

@@ -1,9 +1,9 @@
-﻿using Reductech.EDR.Core.Internal.Errors;
+﻿using Reductech.Sequence.Core.Internal.Errors;
 
-namespace Reductech.EDR.Connectors.Pwsh;
+namespace Reductech.Sequence.Connectors.Pwsh;
 
-using Reductech.EDR.Core;
-using Reductech.EDR.Core.Attributes;
+using Reductech.Sequence.Core;
+using Reductech.Sequence.Core.Attributes;
 
 /// <summary>
 /// Executes a powershell script.

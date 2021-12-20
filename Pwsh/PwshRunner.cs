@@ -3,7 +3,7 @@ using System.Management.Automation.Runspaces;
 using System.Threading.Tasks.Dataflow;
 using Microsoft.Extensions.Logging;
 
-namespace Reductech.EDR.Connectors.Pwsh;
+namespace Reductech.Sequence.Connectors.Pwsh;
 
 /// <summary>
 /// Collection of methods to run powershell scripts

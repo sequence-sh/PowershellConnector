@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using MELT;
 using Moq;
-using Reductech.EDR.Core.Enums;
+using Reductech.Sequence.Core.Enums;
 using Xunit;
-using Entity = Reductech.EDR.Core.Entity;
+using Entity = Reductech.Sequence.Core.Entity;
 
-namespace Reductech.EDR.Connectors.Pwsh.Tests;
+namespace Reductech.Sequence.Connectors.Pwsh.Tests;
 
 public class PwshRunnerTests
 {

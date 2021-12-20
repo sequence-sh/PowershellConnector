@@ -4,7 +4,7 @@
 /label ~"wf::backlog"
 /label ~"area::connectors"
 /label ~powershell
-/label ~edr
+/label ~sequence
 
 ## Summary
 
