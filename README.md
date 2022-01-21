@@ -1,6 +1,6 @@
-# Sequence� PowerShell Connector
+# Sequence® PowerShell Connector
 
-[Reductech Sequence](https://gitlab.com/reductech/sequence) is a collection of
+[Sequence®](https://gitlab.com/reductech/sequence) is a collection of
 libraries that automates cross-application e-discovery and forensic workflows.
 
 The PowerShell connector contains Steps for executing inline PowerShell scripts in
@@ -30,18 +30,6 @@ Run a script that receives input as an Entity stream:
     )
     Action: (Print (GetVariable <entity>))
 ```
-
-## Documentation
-
-Documentation is available here: https://docs.reductech.io
-
-## E-discovery Reduct
-
-The PowerShell Connector is part of a group of projects called
-[E-discovery Reduct](https://gitlab.com/reductech/sequence)
-which consists of a collection of [Connectors](https://gitlab.com/reductech/sequence/connectors)
-and a command-line application for running Sequences, called
-[Sequence](https://gitlab.com/reductech/sequence/console/-/releases).
 
 # Releases
 
