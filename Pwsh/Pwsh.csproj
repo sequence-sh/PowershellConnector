@@ -32,7 +32,7 @@
     <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.2.1">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Reductech.Sequence.Core" Version="0.14.0-a.main.2203141351">
+    <PackageReference Include="Reductech.Sequence.Core" Version="0.14.0-a.main.2203181715">
       <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
   </ItemGroup>
