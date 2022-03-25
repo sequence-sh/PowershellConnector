@@ -31,6 +31,10 @@ Run a script that receives input as an Entity stream:
     Action: (Print (GetVariable <entity>))
 ```
 
+# Documentation
+
+Documentation available at https://sequence.sh
+
 # Releases
 
 Can be downloaded from the [Releases page](https://gitlab.com/reductech/sequence/connectors/pwsh/-/releases).
