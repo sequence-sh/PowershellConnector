@@ -1,3 +1,7 @@
+# v0.16.0 (2022-07-13)
+
+Maintenance release - dependency updates only.
+
 # v0.15.0 (2022-05-27)
 
 Maintenance release - dependency updates only.
@@ -123,6 +127,7 @@ First release. Version numbers are aligned across `EDR`.
 
 - Allow scripts to accept an EntityStream as input #2
 - Allow parameters to be passed to scripts, so that they can be customised dynamically #1
+
 
 
 
