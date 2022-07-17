@@ -14,22 +14,50 @@
   <PropertyGroup>
     <PackageId>Reductech.Sequence.Connectors.Pwsh</PackageId>
     <Title>Sequence® PowerShell Connector</Title>
-    <Description>Class library for executing inline PowerShell scripts as Steps</Description>
+    <Description>
+      Sequence connector for using PowerShell scripts when automating e-discovery and
+      forensic workflows.
+    </Description>
     <Product>Sequence®</Product>
     <PackageTags>ediscovery;forensics;pwsh;powershell;automation;orchestration;edrm;sequence</PackageTags>
 
-    <PackageProjectUrl>https://gitlab.com/reductech/sequence/connectors/pwsh</PackageProjectUrl>
-    <RepositoryUrl>https://gitlab.com/reductech/sequence/connectors/pwsh</RepositoryUrl>
+    <PackageProjectUrl>https://sequence.sh</PackageProjectUrl>
+    <RepositoryUrl>https://gitlab.com/reductech/sequence/connectors/pwsh.git</RepositoryUrl>
     <PackageReleaseNotes>https://gitlab.com/reductech/sequence/connectors/pwsh/-/blob/master/CHANGELOG.md</PackageReleaseNotes>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+
     <Authors>Reductech</Authors>
     <Company>Reductech</Company>
     <Copyright>Copyright (c) 2022 Reductech Ltd</Copyright>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(CI)' != ''">
+    <!-- deterministic builds for Source Link -->
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- Source Link and symbols -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../CHANGELOG.md" Pack="true" PackagePath="/" />
+    <None Include="../LICENSE" Pack="true" PackagePath="/" />
+    <None Include="../NOTICE" Pack="true" PackagePath="/" />
+    <None Include="../README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.PowerShell.SDK" Version="7.2.5">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.SourceLink.GitLab" Version="1.1.1">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Reductech.Sequence.Core" Version="0.16.0-a.main.2207111038">
@@ -37,15 +65,8 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup Condition="$(PackConnector) != ''">
-    <None Include="..\README.md" Pack="true" PackagePath="\" />
-    <None Include="..\LICENSE" Pack="true" PackagePath="\" />
-    <None Include="..\NOTICE" Pack="true" PackagePath="\" />
-  </ItemGroup>
-
   <PropertyGroup Condition="$(PackConnector) != ''">
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageLicenseExpression></PackageLicenseExpression>
   </PropertyGroup>
