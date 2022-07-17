@@ -1,3 +1,9 @@
+# v0.16.0 (2022-07-13)
+
+- Enabled [Source Link](https://docs.microsoft.com/en-us/dotnet/standard/library-guidance/sourcelink)
+- Enabled publish to [Nuget.org](https://www.nuget.org) including symbols
+- Update Core to v0.16.0
+
 # v0.15.0 (2022-05-27)
 
 Maintenance release - dependency updates only.
@@ -123,7 +129,3 @@ First release. Version numbers are aligned across `EDR`.
 
 - Allow scripts to accept an EntityStream as input #2
 - Allow parameters to be passed to scripts, so that they can be customised dynamically #1
-
-
-
-
