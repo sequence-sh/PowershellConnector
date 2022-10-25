@@ -16,7 +16,7 @@ namespace Reductech.Sequence.Connectors.Pwsh;
 public sealed class PwshRunScriptAsync : CompoundStep<Array<Entity>>
 {
     /// <inheritdoc />
-    protected override async Task<Result<Array<Entity>, IError>> Run(
+    protected override async ValueTask<Result<Array<Entity>, IError>> Run(
         IStateMonad stateMonad,
         CancellationToken cancellationToken)
     {
@@ -55,9 +55,12 @@ public sealed class PwshRunScriptAsync : CompoundStep<Array<Entity>>
                 return inputStream.ConvertFailure<Array<Entity>>();
 
             input = new PSDataCollection<PSObject>();
+            var forEachResult = await inputStream.Value.ForEach(AddObject, cancellationToken);
 
-            _ = inputStream.Value.ForEach(AddObject, cancellationToken)
-                .ContinueWith(_ => input.Complete(), cancellationToken);
+            input.Complete();
+
+            if (forEachResult.IsFailure)
+                return forEachResult.ConvertFailure<Array<Entity>>();
         }
 
         var stream = PwshRunner.GetEntityEnumerable(script.Value, stateMonad.Logger, vars, input)

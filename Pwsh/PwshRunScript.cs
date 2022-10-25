@@ -2,9 +2,6 @@
 
 namespace Reductech.Sequence.Connectors.Pwsh;
 
-using Reductech.Sequence.Core;
-using Reductech.Sequence.Core.Attributes;
-
 /// <summary>
 /// Executes a powershell script.
 /// </summary>
@@ -14,7 +11,7 @@ using Reductech.Sequence.Core.Attributes;
 public sealed class PwshRunScript : CompoundStep<Unit>
 {
     /// <inheritdoc />
-    protected override async Task<Result<Unit, IError>> Run(
+    protected override async ValueTask<Result<Unit, IError>> Run(
         IStateMonad stateMonad,
         CancellationToken cancellationToken)
     {
