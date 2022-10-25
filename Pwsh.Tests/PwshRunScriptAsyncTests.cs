@@ -1,4 +1,5 @@
-﻿using Reductech.Sequence.Core.Steps;
+﻿using Reductech.Sequence.Core.Entities;
+using Reductech.Sequence.Core.Steps;
 
 namespace Reductech.Sequence.Connectors.Pwsh.Tests;
 
@@ -11,28 +12,28 @@ public partial class PwshRunScriptAsyncTests : StepTestBase<PwshRunScriptAsync, 
         {
             yield return new StepCase(
                 "Run PowerShell script that returns a string",
-                new ForEach<Entity>()
+                new ForEach<Entity>
                 {
                     Array =
                         new PwshRunScriptAsync { Script = Constant(@"Write-Output 'hello!'") },
                     Action = new LambdaFunction<Entity, Unit>(
                         null,
-                        new Log() { Value = GetEntityVariable }
+                        new Log { Value = GetEntityVariable }
                     )
                 },
                 Unit.Default,
-                $"('{Entity.PrimitiveKey}': \"hello!\")"
+                $"('{EntityKey.PrimitiveKey}': \"hello!\")"
             );
 
             yield return new StepCase(
                 "Run PowerShell script that returns nothing but emits a warning",
-                new ForEach<Entity>()
+                new ForEach<Entity>
                 {
                     Array =
                         new PwshRunScriptAsync { Script = Constant(@"Write-Warning 'warning'") },
                     Action = new LambdaFunction<Entity, Unit>(
                         null,
-                        new Log() { Value = GetEntityVariable }
+                        new Log { Value = GetEntityVariable }
                     )
                 },
                 Unit.Default,
@@ -41,24 +42,24 @@ public partial class PwshRunScriptAsyncTests : StepTestBase<PwshRunScriptAsync, 
 
             yield return new StepCase(
                 "Run PowerShell script that returns a stream of ints",
-                new ForEach<Entity>()
+                new ForEach<Entity>
                 {
                     Array =
                         new PwshRunScriptAsync { Script = Constant(@"1..3 | Write-Output") },
                     Action = new LambdaFunction<Entity, Unit>(
                         null,
-                        new Log() { Value = GetEntityVariable }
+                        new Log { Value = GetEntityVariable }
                     )
                 },
                 Unit.Default,
-                $"('{Entity.PrimitiveKey}': 1)",
-                $"('{Entity.PrimitiveKey}': 2)",
-                $"('{Entity.PrimitiveKey}': 3)"
+                $"('{EntityKey.PrimitiveKey}': 1)",
+                $"('{EntityKey.PrimitiveKey}': 2)",
+                $"('{EntityKey.PrimitiveKey}': 3)"
             );
 
             yield return new StepCase(
                 "Run PowerShell script that returns a PSObject",
-                new ForEach<Entity>()
+                new ForEach<Entity>
                 {
                     Array = new PwshRunScriptAsync
                     {
@@ -68,7 +69,7 @@ public partial class PwshRunScriptAsyncTests : StepTestBase<PwshRunScriptAsync, 
                     },
                     Action = new LambdaFunction<Entity, Unit>(
                         null,
-                        new Log() { Value = GetEntityVariable }
+                        new Log { Value = GetEntityVariable }
                     )
                 },
                 Unit.Default,
@@ -77,7 +78,7 @@ public partial class PwshRunScriptAsyncTests : StepTestBase<PwshRunScriptAsync, 
 
             yield return new StepCase(
                 "Run PowerShell passing a variable set to it",
-                new ForEach<Entity>()
+                new ForEach<Entity>
                 {
                     Array = new PwshRunScriptAsync
                     {
@@ -91,7 +92,7 @@ public partial class PwshRunScriptAsyncTests : StepTestBase<PwshRunScriptAsync, 
                     },
                     Action = new LambdaFunction<Entity, Unit>(
                         null,
-                        new Log() { Value = GetEntityVariable }
+                        new Log { Value = GetEntityVariable }
                     )
                 },
                 Unit.Default,
@@ -113,7 +114,7 @@ public partial class PwshRunScriptAsyncTests : StepTestBase<PwshRunScriptAsync, 
                     },
                     Action = new LambdaFunction<Entity, Unit>(
                         null,
-                        new Log() { Value = GetEntityVariable }
+                        new Log { Value = GetEntityVariable }
                     )
                 },
                 Unit.Default,

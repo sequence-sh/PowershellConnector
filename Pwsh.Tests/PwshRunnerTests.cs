@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using MELT;
 using Moq;
+using Reductech.Sequence.Core.Entities;
 using Reductech.Sequence.Core.Enums;
 using Xunit;
 using Entity = Reductech.Sequence.Core.Entity;
@@ -36,7 +37,7 @@ public class PwshRunnerTests
         sender.Add(expected);
         sender.Add("string1");
 
-        PwshRunner.ProcessData<string>(sender, 0, o => { });
+        PwshRunner.ProcessData<string>(sender, 0, _ => { });
 
         Assert.Single(sender);
         Assert.DoesNotContain(sender, o => expected.Equals(o));
@@ -51,7 +52,7 @@ public class PwshRunnerTests
 
         sender.Add(str);
 
-        PwshRunner.ProcessData<object>(sender, 0, mock.Object);
+        PwshRunner.ProcessData(sender, 0, mock.Object);
 
         mock.Verify(m => m.Invoke(str));
     }
@@ -136,11 +137,11 @@ public class PwshRunnerTests
             ("Var6", new DateTime(2020, 12, 12))
         );
 
-        var result = await PwshRunner.RunScript(script, lf.CreateLogger("Test"), entity, null);
+        var result = await PwshRunner.RunScript(script, lf.CreateLogger("Test"), entity);
 
-        for (var i = 0; i < entity.Dictionary.Count; i++)
+        for (var i = 0; i < entity.Headers.Length; i++)
             Assert.Equal(
-                entity.Dictionary[$"Var{i + 1}"].Value,
+                entity.TryGetValue($"Var{i + 1}").Value,
                 result[i].BaseObject
             );
     }
@@ -226,12 +227,12 @@ public class PwshRunnerTests
             ("Var6", new DateTime(2020, 12, 12))
         );
 
-        var result = await PwshRunner.RunScriptAsync(script, lf.CreateLogger("Test"), entity, null)
+        var result = await PwshRunner.RunScriptAsync(script, lf.CreateLogger("Test"), entity)
             .ToListAsync();
 
-        for (var i = 0; i < entity.Dictionary.Count; i++)
+        for (var i = 0; i < entity.Headers.Length; i++)
             Assert.Equal(
-                entity.Dictionary[$"Var{i + 1}"].Value,
+                entity.TryGetValue($"Var{i + 1}").Value,
                 result[i].BaseObject
             );
     }
@@ -257,14 +258,14 @@ public class PwshRunnerTests
 
         var entity = PwshRunner.EntityFromPSObject(pso);
 
-        Assert.NotNull(entity);
+        //Assert.NotNull(entity);
 
         var val1 = entity.TryGetValue("prop1").Map(x => x.Serialize(SerializeOptions.Primitive));
         var val2 = entity.TryGetValue("prop2").Map(x => x.Serialize(SerializeOptions.Primitive));
 
         Assert.Equal(2,        entity.Count());
-        Assert.Equal("value1", val1!.ToString());
-        Assert.Equal("value2", val2!.ToString());
+        Assert.Equal("value1", val1.ToString());
+        Assert.Equal("value2", val2.ToString());
     }
 
     [Theory]
@@ -278,9 +279,9 @@ public class PwshRunnerTests
 
         var entity = PwshRunner.EntityFromPSObject(pso);
 
-        Assert.NotNull(entity);
+        //Assert.NotNull(entity);
 
-        var val = entity.TryGetValue(Entity.PrimitiveKey).Value;
+        var val = entity.TryGetValue(EntityKey.PrimitiveKey).Value;
 
         Assert.Equal(expected, val.ToCSharpObject());
     }
@@ -292,7 +293,7 @@ public class PwshRunnerTests
 
         var entity = PwshRunner.EntityFromPSObject(pso);
 
-        Assert.NotNull(entity);
+        //Assert.NotNull(entity);
 
         var val1 = entity.TryGetValue("prop1").Map(x => x.Serialize(SerializeOptions.Primitive));
         var val2 = entity.TryGetValue("prop2").Map(x => x);
@@ -329,12 +330,12 @@ public class PwshRunnerTests
 
         var entity = PwshRunner.EntityFromPSObject(pso);
 
-        Assert.NotNull(entity);
+        //Assert.NotNull(entity);
 
-        var actual = ConvertToList(entity.Dictionary[Entity.PrimitiveKey].Value);
+        var actual = ConvertToList(entity.TryGetValue(EntityKey.PrimitiveKey).Value);
 
-        Assert.Equal(ISCLObject.CreateFromCSharpObject(arr[0]), actual![0]);
-        Assert.Equal(ISCLObject.CreateFromCSharpObject(arr[1]), actual![1]);
+        Assert.Equal(ISCLObject.CreateFromCSharpObject(arr[0]), actual[0]);
+        Assert.Equal(ISCLObject.CreateFromCSharpObject(arr[1]), actual[1]);
     }
 
     [Fact]
@@ -349,7 +350,7 @@ public class PwshRunnerTests
 
         Assert.Single(result);
 
-        var actual = ConvertToList(result[0].Dictionary[Entity.PrimitiveKey].Value);
+        var actual = ConvertToList(result[0].TryGetValue(EntityKey.PrimitiveKey).Value);
 
         Assert.Equal(new StringStream("value1"), actual[0]);
         Assert.Equal(2.ConvertToSCLObject(),     actual[1]);
@@ -369,7 +370,7 @@ public class PwshRunnerTests
     [InlineData(true)]
     public void PSObjectFromEntity_WhenEntityIsAPrimitive_ReturnsPsObject(object expected)
     {
-        var entity = Entity.Create((Entity.PrimitiveKey, expected));
+        var entity = Entity.Create((EntityKey.PrimitiveKey, expected));
 
         var actual = PwshRunner.PSObjectFromEntity(entity);
 
@@ -396,7 +397,7 @@ public class PwshRunnerTests
         foreach (var prop in entity)
             Assert.Equal(
                 prop.Value.ToCSharpObject(),
-                actual.Properties[prop.Name].Value
+                actual.Properties[prop.Key.Inner].Value
             );
     }
 

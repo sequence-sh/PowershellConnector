@@ -2,6 +2,7 @@
 using System.Management.Automation.Runspaces;
 using System.Threading.Tasks.Dataflow;
 using Microsoft.Extensions.Logging;
+using Reductech.Sequence.Core.Entities;
 
 namespace Reductech.Sequence.Connectors.Pwsh;
 
@@ -36,8 +37,8 @@ public class PwshRunner
 
         if (variables != null)
         {
-            var vars = variables.Select(
-                v => new SessionStateVariableEntry(v.Name, v.Value, string.Empty)
+            var vars = variables.Value.Select(
+                v => new SessionStateVariableEntry(v.Key.Inner, v.Value, string.Empty)
             );
 
             iss.Variables.Add(vars);
@@ -134,7 +135,7 @@ public class PwshRunner
     /// </summary>
     public static Entity EntityFromPSObject(PSObject pso)
     {
-        Entity? entity;
+        Entity entity;
 
         if (pso == null)
             throw new NullReferenceException($"{nameof(pso)} cannot be null");
@@ -159,7 +160,7 @@ public class PwshRunner
                 break;
             }
             default:
-                entity = Entity.Create((Entity.PrimitiveKey, pso.BaseObject));
+                entity = Entity.Create((EntityKey.PrimitiveKey, pso.BaseObject));
                 break;
         }
 
@@ -171,7 +172,7 @@ public class PwshRunner
     /// </summary>
     public static PSObject PSObjectFromEntity(Entity entity)
     {
-        var single = entity.TryGetValue(Entity.PrimitiveKey);
+        var single = entity.TryGetValue(EntityKey.PrimitiveKey);
 
         if (single.HasValue)
             return new PSObject(GetValue(single.Value));
@@ -195,7 +196,7 @@ public class PwshRunner
         };
 
         foreach (var e in entity)
-            pso.Properties.Add(new PSNoteProperty(e.Name, GetValue(e.Value)));
+            pso.Properties.Add(new PSNoteProperty(e.Key.Inner, GetValue(e.Value)));
 
         return pso;
     }
