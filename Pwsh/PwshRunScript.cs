@@ -1,6 +1,6 @@
-﻿using Reductech.Sequence.Core.Internal.Errors;
+﻿using Sequence.Core.Internal.Errors;
 
-namespace Reductech.Sequence.Connectors.Pwsh;
+namespace Sequence.Connectors.Pwsh;
 
 /// <summary>
 /// Executes a powershell script.

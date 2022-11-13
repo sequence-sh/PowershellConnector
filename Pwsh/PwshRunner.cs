@@ -2,9 +2,9 @@
 using System.Management.Automation.Runspaces;
 using System.Threading.Tasks.Dataflow;
 using Microsoft.Extensions.Logging;
-using Reductech.Sequence.Core.Entities;
+using Sequence.Core.Entities;
 
-namespace Reductech.Sequence.Connectors.Pwsh;
+namespace Sequence.Connectors.Pwsh;
 
 /// <summary>
 /// Collection of methods to run powershell scripts

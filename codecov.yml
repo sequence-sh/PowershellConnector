@@ -1,5 +1,6 @@
 codecov:
-  bot: reduct-o-bot
-
+  bot: sq-bot
 ignore:
   - '**/*.Designer.cs'
+  - '**/*.Generated.cs'
+  - '**/Generator.Equals/**/*.cs'

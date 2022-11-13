@@ -1,4 +1,4 @@
-# Sequence® PowerShell Connector
+# Sequence PowerShell Connector
 
 [Sequence®](https://sequence.sh) is a collection of libraries for
 automation of cross-application e-discovery and forensic workflows.
@@ -45,7 +45,7 @@ https://sequence.sh/playground
 
 # Package Releases
 
-Can be downloaded from the [Releases page](https://gitlab.com/reductech/sequence/connectors/pwsh/-/releases).
+Can be downloaded from the [Releases page](https://gitlab.com/sequence/connectors/pwsh/-/releases).
 
 # NuGet Packages
 

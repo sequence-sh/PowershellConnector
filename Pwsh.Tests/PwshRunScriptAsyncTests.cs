@@ -1,7 +1,7 @@
-﻿using Reductech.Sequence.Core.Entities;
-using Reductech.Sequence.Core.Steps;
+﻿using Sequence.Core.Entities;
+using Sequence.Core.Steps;
 
-namespace Reductech.Sequence.Connectors.Pwsh.Tests;
+namespace Sequence.Connectors.Pwsh.Tests;
 
 public partial class PwshRunScriptAsyncTests : StepTestBase<PwshRunScriptAsync, Array<Entity>>
 {

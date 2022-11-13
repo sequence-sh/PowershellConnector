@@ -1,7 +1,7 @@
 ﻿global using System;
 global using System.Collections.Generic;
-global using Reductech.Sequence.Core;
-global using Reductech.Sequence.Core.Internal;
-global using Reductech.Sequence.Core.Util;
-global using Reductech.Sequence.Core.TestHarness;
-global using static Reductech.Sequence.Core.TestHarness.StaticHelpers;
+global using Sequence.Core;
+global using Sequence.Core.Internal;
+global using Sequence.Core.Util;
+global using Sequence.Core.TestHarness;
+global using static Sequence.Core.TestHarness.StaticHelpers;

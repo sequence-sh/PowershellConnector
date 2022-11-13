@@ -4,15 +4,15 @@
     <TargetFramework>net6.0</TargetFramework>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <RootNamespace>Reductech.Sequence.Connectors.Pwsh</RootNamespace>
-    <AssemblyName>Reductech.Sequence.Connectors.Pwsh</AssemblyName>
+    <RootNamespace>Sequence.Connectors.Pwsh</RootNamespace>
+    <AssemblyName>Sequence.Connectors.Pwsh</AssemblyName>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <Nullable>enable</Nullable>
     <Version>0.18.0$(VersionSuffix)</Version>
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageId>Reductech.Sequence.Connectors.Pwsh</PackageId>
+    <PackageId>Sequence.Connectors.Pwsh</PackageId>
     <Title>Sequence® PowerShell Connector</Title>
     <Description>
       Sequence connector for using PowerShell scripts when automating e-discovery and
@@ -22,12 +22,12 @@
     <PackageTags>ediscovery;forensics;pwsh;powershell;automation;orchestration;edrm;sequence</PackageTags>
 
     <PackageProjectUrl>https://sequence.sh</PackageProjectUrl>
-    <RepositoryUrl>https://gitlab.com/reductech/sequence/connectors/pwsh.git</RepositoryUrl>
-    <PackageReleaseNotes>https://gitlab.com/reductech/sequence/connectors/pwsh/-/blob/master/CHANGELOG.md</PackageReleaseNotes>
+    <RepositoryUrl>https://gitlab.com/sequence/connectors/pwsh.git</RepositoryUrl>
+    <PackageReleaseNotes>https://gitlab.com/sequence/connectors/pwsh/-/blob/master/CHANGELOG.md</PackageReleaseNotes>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
 
-    <Authors>Reductech</Authors>
+    <Authors>antonyoni;MarkWainwright</Authors>
     <Company>Reductech</Company>
     <Copyright>Copyright (c) 2022 Reductech Ltd</Copyright>
   </PropertyGroup>
@@ -60,7 +60,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Reductech.Sequence.Core" Version="0.18.0-a.main.2211070211">
+    <PackageReference Include="Sequence.Core" Version="0.18.0-a.main.2211102318">
       <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
   </ItemGroup>
