@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace Reductech.Sequence.Connectors.Pwsh.Tests;
+namespace Sequence.Connectors.Pwsh.Tests;
 
 public class MetaTests : MetaTestsBase
 {
