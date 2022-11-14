@@ -1,3 +1,11 @@
+# v0.18.0 (2022-11-14)
+
+## Issues Closed in this Release
+
+### Other
+
+- Update namespace and paths after move to Sequence group #154
+
 # v0.17.0 (2022-08-29)
 
 Maintenance release - dependency updates only.
@@ -133,4 +141,5 @@ First release. Version numbers are aligned across `EDR`.
 
 - Allow scripts to accept an EntityStream as input #2
 - Allow parameters to be passed to scripts, so that they can be customised dynamically #1
+
 
